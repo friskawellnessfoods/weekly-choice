@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" 
+      content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+
+    <style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f6f8;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px;
+  }
+
+  /* HEADER */
+  .topbar {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .logo {
+    max-width: 150px;
+    height: auto;
+  }
+
+  h2 {
+    font-size: 22px;
+    margin: 10px 0 20px;
+    text-align: center;
+  }
+
+  h3 {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  h4 {
+    font-size: 16px;
+    margin: 18px 0 10px;
+  }
+
+  /* CARD */
+  .box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  }
+
+  /* FORM */
+  label {
+    font-size: 14px;
+    margin-bottom: 6px;
+    display: block;
+    font-weight: 500;
+  }
+
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 16px;
+    font-size: 18px; /* prevents mobile zoom */
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    background: #fff;
+    box-sizing: border-box;
+  }
+  #phone {
+    font-size: 20px;
+    padding: 18px;
+  }
+
+  input[readonly] {
+    background: #f9f9f9;
+  }
+
+  /* BUTTONS */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: none;
+    background: #1976d2;
+    color: #fff;
+    margin-top: 14px;
+    font-weight: 600;
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn.secondary {
+    background: #e0e0e0;
+    color: #000;
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .section-controls select {
+    flex: 1;
+  }
+
+ /* DISH */
+  .dish {
+    background: #f7f7f7;
+    border-radius: 12px;
+    padding: 6px 10px;       /* reduced vertical padding */
+    margin-bottom: 4px;      /* less space between dishes */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .dish-name {
+    font-size: 15px;         /* slightly bigger for clarity */
+    line-height: 1.25;       /* tighter text */
+    flex: 1;
+    padding-right: 8px;
+  }
+
+  /* QTY CONTROL */
+  .qty {
+    display: flex;
+    align-items: center;
+    gap: 6px;                /* tighter gap */
+  }
+
+  .qty button {
+    width: 36px;             /* slightly larger tap target */
+    height: 36px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #e4e4e4;
+  }
+
+  .qty span {
+    min-width: 24px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* CHECKBOX */
+  input[type="checkbox"] {
+    transform: scale(1.3);
+    margin-right: 6px;
+  }
+  /* ====== LAYOUT FIX ====== */
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .wrapper {
+    width: 96%;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Reduce section spacing */
+  .section {
+    margin-bottom: 16px;
+  }
+
+  /* Reduce card padding */
+  .card {
+    padding: 16px !important;
+  }
+  html, body {
+    height: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  body {
+    touch-action: manipulation;
+  }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+<div class="app">
+<div class="topbar">
+  <?!= HtmlService.createHtmlOutputFromFile('logo').getContent(); ?>
+</div>
+
+<h2>Weekly Meal Selection</h2>
+
+<div class="box">
+  <label>Phone</label>
+  <input id="phone" inputmode="numeric"
+         onkeydown="if(event.key==='Enter'){fetchClient()}">
+  <button class="btn" onclick="fetchClient()">Fetch Client</button>
+
+  <label style="margin-top:24px;">Client Name</label>
+  <input type="text" id="clientName" readonly>
+
+  <label>Type</label>
+  <input type="text" id="clientType" readonly>
+
+  <label>Remarks</label>
+  <input type="text" id="clientRemarks" readonly>
+</div>
+
+<div id="dayContainer"></div>
+
+<button id="nextBtn" class="btn secondary" onclick="nextDay()">Next Day</button>
+<button class="btn" onclick="submitData(event)">Submit</button>
+
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwERQUZfaSf_iCyj4XjbGMxjzZOn-PvoardNR7UkNe9deizAEYC9_4McLjemf7e4T7N/exec";  
+let CLIENT_LOCATION_1 = '';
+let CLIENT_LOCATION_2 = '';
+let CLIENT_DELIVERY = {};
+/* ========= CONFIG ========= */
+const CUTOFF_HOUR = 00;
+
+let MENU = {};
+let DATES = [];
+let VISIBLE_DATES = [];
+let STATE = {};
+let currentIndex = 0;
+
+/* ========= FETCH ========= */
+async function fetchClient() {
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) return alert('Enter phone');
+
+  const res = await fetch(`${API_URL}?action=getClient&phone=${phone}`);
+  const data = await res.json();
+
+  if (!data || !data.found) return alert('Client not found');
+
+  clientName.value = data.clientName || '';
+  clientType.value = data.mealType || '';
+  clientRemarks.value = data.remarks || '';
+
+  CLIENT_LOCATION_1 = data.location1 || '';
+  CLIENT_LOCATION_2 = data.location2 || '';
+  CLIENT_DELIVERY = data.delivery || {};
+
+  const menuRes = await fetch(`${API_URL}?action=getMenu`);
+  MENU = await menuRes.json();
+
+  DATES = Object.keys(MENU).sort();
+  applyCutoff();
+  initState();
+  renderCurrentDay();
+}
+
+
+/* ========= CUTOFF ========= */
+function applyCutoff() {
+
+  const now = new Date();
+
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  const targetDate = new Date(today);
+
+  // Always show tomorrow
+  targetDate.setDate(today.getDate() + 1);
+
+  // Only apply extra shift if cutoff is NOT midnight
+  if (CUTOFF_HOUR > 0) {
+    const afterCutoff = now.getHours() >= CUTOFF_HOUR;
+    if (afterCutoff) {
+      targetDate.setDate(targetDate.getDate() + 1);
+    }
+  }
+
+  const targetStr =
+    targetDate.getFullYear() + '-' +
+    String(targetDate.getMonth() + 1).padStart(2, '0') + '-' +
+    String(targetDate.getDate()).padStart(2, '0');
+
+  VISIBLE_DATES = DATES.filter(d => d === targetStr);
+
+  currentIndex = 0;
+}
+
+/* ========= STATE ========= */
+function initState(){
+  VISIBLE_DATES.forEach(date => {
+
+    STATE[date] = {
+      sections: {
+        breakfast: { items: {}, slot: 'Morning', location: '' },
+        option1:   { items: {}, slot: 'Afternoon', location: '' },
+        option2:   { items: {}, slot: 'Evening', location: '' },
+        snack:     { items: {}, slot: 'Afternoon', location: '' },
+        juice1:    { items: {}, slot: 'Afternoon', location: '' },
+        juice2:    { items: {}, slot: 'Evening', location: '' }
+      },
+      cancel: false
+    };
+
+    // Populate items
+    ['option1','option2','breakfast'].forEach(sec => {
+      MENU[date][sec].forEach(item => {
+        STATE[date].sections[sec].items[item.label] = {
+          qty: 0,
+          protein: item.protein
+        };
+      });
+    });
+
+    MENU[date].snack.forEach(item => {
+      STATE[date].sections.snack.items[item.label] = {
+        qty: 0,
+        type: item.type,
+        label: item.label
+      };
+    });
+
+    MENU[date].juice1.forEach(j => {
+      STATE[date].sections.juice1.items[j] = { qty: 0 };
+    });
+
+    MENU[date].juice2.forEach(j => {
+      STATE[date].sections.juice2.items[j] = { qty: 0 };
+    });
+
+  });
+}
+
+function hasAfternoonEveningSlots() {
+  return CLIENT_DELIVERY?.afternoon && CLIENT_DELIVERY?.evening;
+}
+
+
+
+/* ========= RENDER ========= */
+function renderCurrentDay(){
+  const date = VISIBLE_DATES[currentIndex];
+  const container = document.getElementById('dayContainer');
+
+  if (!date) {
+    container.innerHTML = '<div class="box">Ordering closed.</div>';
+    return;
+  }
+
+  const dayName = new Date(date).toLocaleDateString('en-US',{ weekday:'long' });
+
+  container.innerHTML = `
+    <div class="box">
+      <h3>${dayName} (${date})</h3>
+      ${renderBlock(date,'breakfast','Breakfast')}
+      ${renderBlock(date,'option1','Option 1')}
+      ${renderBlock(date,'option2','Option 2')}
+      ${renderBlock(date,'snack','Snack')}
+      ${renderBlock(date,'juice1','Juice 1')}
+      ${renderBlock(date,'juice2','Juice 2')}
+      <label>
+        <input type="checkbox"
+          onchange="STATE['${date}'].cancel=this.checked"> Cancel this day
+      </label>
+     ${!hasAfternoonEveningSlots() ? `
+      <label>Location</label>
+      <select id="loc_${date}">
+        <option value="">Select Location</option>
+        ${CLIENT_LOCATION_1 ? `<option value="${CLIENT_LOCATION_1.replace(/"/g,'&quot;')}">${CLIENT_LOCATION_1}</option>` : ''}
+        ${CLIENT_LOCATION_2 ? `<option value="${CLIENT_LOCATION_2.replace(/"/g,'&quot;')}">${CLIENT_LOCATION_2}</option>` : ''}
+      </select>
+      ` : ``}
+    </div>
+  `;
+
+  nextBtn.disabled = currentIndex === VISIBLE_DATES.length - 1;
+}
+
+function renderBlock(date, slot, title) {
+  const section = STATE[date].sections[slot];
+  const items = section?.items;
+  if (!items || !Object.keys(items).length) return '';
+
+  const showSlotControls =
+    hasAfternoonEveningSlots() && (slot !== 'breakfast');
+
+  const showLocationControl =
+    hasAfternoonEveningSlots() &&
+    (slot === 'option1' || slot === 'option2');
+
+  let headerHTML = '';
+
+  if (showSlotControls) {
+
+    let locOptions = '';
+
+    if (CLIENT_LOCATION_1) {
+      locOptions += `<option value="${CLIENT_LOCATION_1.replace(/"/g,'&quot;')}"
+        ${section.location === CLIENT_LOCATION_1 ? 'selected' : ''}>
+        ${CLIENT_LOCATION_1}
+      </option>`;
+    }
+
+    if (CLIENT_LOCATION_2) {
+      locOptions += `<option value="${CLIENT_LOCATION_2.replace(/"/g,'&quot;')}"
+        ${section.location === CLIENT_LOCATION_2 ? 'selected' : ''}>
+        ${CLIENT_LOCATION_2}
+      </option>`;
+    }
+
+    headerHTML = `
+      <div class="section-header">
+        <h4>${title}</h4>
+        <div class="section-controls">
+
+          <select id="slot_${date}_${slot}"
+            onchange="updateSectionSlot('${date}','${slot}',this.value)">
+            <option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>
+            <option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>
+          </select>
+
+          ${showLocationControl ? `
+            <select id="loc_${date}_${slot}"
+              onchange="updateSectionLocation('${date}','${slot}',this.value)">
+              <option value="">Location</option>
+              ${locOptions}
+            </select>
+          ` : ``}
+
+        </div>
+      </div>
+    `;
+  } else {
+    headerHTML = `<h4>${title}</h4>`;
+  }
+
+  return headerHTML +
+    Object.keys(items).map(label => `
+      <div class="dish">
+        <div class="dish-name">${label}</div>
+        <div class="qty">
+          <button onclick="changeQty('${date}','${slot}','${label}',-1)">−</button>
+          <span id="${btoa(date+slot+label)}">${section.items[label].qty}</span>
+          <button onclick="changeQty('${date}','${slot}','${label}',1)">+</button>
+        </div>
+      </div>
+    `).join('');
+}
+
+
+
+function changeQty(d,s,l,delta){
+  const obj = STATE[d].sections[s].items[l];
+  obj.qty = Math.max(0, obj.qty + delta);
+  document.getElementById(btoa(d+s+l)).innerText = obj.qty;
+}
+function updateSectionSlot(date, section, value) {
+
+  const sec = STATE[date].sections;
+
+  sec[section].slot = value;
+
+  if (section === 'option1') {
+    const otherSlot = value === 'Afternoon' ? 'Evening' : 'Afternoon';
+    sec.option2.slot = otherSlot;
+
+    const otherSelect = document.getElementById(`slot_${date}_option2`);
+    if (otherSelect) otherSelect.value = otherSlot;
+  }
+
+  if (section === 'option2') {
+    const otherSlot = value === 'Afternoon' ? 'Evening' : 'Afternoon';
+    sec.option1.slot = otherSlot;
+
+    const otherSelect = document.getElementById(`slot_${date}_option1`);
+    if (otherSelect) otherSelect.value = otherSlot;
+  }
+}
+
+function updateSectionLocation(date, section, value) {
+  STATE[date].sections[section].location = value;
+}
+
+
+function nextDay(){
+  if (currentIndex < VISIBLE_DATES.length - 1) {
+    currentIndex++;
+    renderCurrentDay();
+  }
+}
+
+/* ========= SUBMIT ========= */
+async function submitData(e) {
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) return alert('Phone missing');
+
+  const btn = e.target;
+  btn.disabled = true;
+  btn.innerText = 'Submitting…';
+
+  const payload = {
+    phone,
+    remarks: clientRemarks.value || '',
+    days: VISIBLE_DATES.map(date => ({
+      date,
+      sections: STATE[date].sections,
+      cancel: STATE[date].cancel
+    }))
+  };
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "submitOrder",
+      payload
+    })
+  });
+
+  const result = await res.json();
+
+  btn.disabled = false;
+  btn.innerText = 'Submit';
+
+  if (result.success) {
+    alert('Submitted successfully');
+  } else {
+    alert('Submission failed');
+  }
+}
+</script>
+  </div>
+</body>
+</html>
