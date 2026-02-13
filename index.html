@@ -234,7 +234,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxflrtrUYfksepAMsTqkmOXytvwHvaBNHbc2JnGOu7cWHc8nxrHAhaSoTcQ8WmUidmL/exec";  
+const API_URL = "https://script.google.com/macros/s/AKfycbw057HSyJptwKfhflAM1xQ5hQKKd2FnCnMAmK-kGRglsMEVOPA5N8laVTG1uMs5Uy4C/exec";  
 let CLIENT_LOCATION_1 = '';
 let CLIENT_LOCATION_2 = '';
 let CLIENT_DELIVERY = {};
@@ -252,13 +252,13 @@ async function fetchClient() {
   const phone = document.getElementById('phone').value.trim();
   if (!phone) return alert('Enter phone');
 
+  const params = new URLSearchParams();
+  params.append("action", "getClient");
+  params.append("phone", phone);
+
   const res = await fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "getClient",
-      phone: phone
-    })
+    body: params
   });
 
   const data = await res.json();
@@ -273,12 +273,12 @@ async function fetchClient() {
   CLIENT_LOCATION_2 = data.location2 || '';
   CLIENT_DELIVERY = data.delivery || {};
 
+  const menuParams = new URLSearchParams();
+  menuParams.append("action", "getMenu");
+
   const menuRes = await fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "getMenu"
-    })
+    body: menuParams
   });
 
   MENU = await menuRes.json();
@@ -545,14 +545,15 @@ async function submitData(e) {
     }))
   };
 
+  const params = new URLSearchParams();
+  params.append("action", "submitOrder");
+  params.append("payload", JSON.stringify(payload));
+
   const res = await fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "submitOrder",
-      payload
-    })
+    body: params
   });
+
 
   const result = await res.json();
 
@@ -565,6 +566,7 @@ async function submitData(e) {
     alert('Submission failed');
   }
 }
+  
 </script>
   </div>
 </body>
