@@ -108,19 +108,27 @@
 
   /* SECTION HEADER */
   .section-header {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-  .section-controls {
-    display: flex;
-    gap: 8px;
-  }
+.section-header h4 {
+  margin: 0;
+  white-space: nowrap;
+}
 
-  .section-controls select {
-    flex: 1;
-  }
+.section-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.section-controls select {
+  width: 130px;   /* fixed width like your first screenshot */
+  padding: 6px 8px;
+  font-size: 14px;
+}
 
  /* DISH */
   .dish {
