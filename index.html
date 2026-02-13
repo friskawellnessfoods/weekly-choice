@@ -293,24 +293,33 @@ async function fetchClient() {
 function applyCutoff() {
 
   const now = new Date();
-
   const today = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate()
   );
 
-  const targetDate = new Date(today);
+  const todayStr =
+    today.getFullYear() + '-' +
+    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+    String(today.getDate()).padStart(2, '0');
 
-  // Always show tomorrow
+  // 🔍 If today's date exists in menu
+  const todayExists = DATES.includes(todayStr);
+
+  if (!todayExists) {
+    // Show all dates if today not in menu
+    VISIBLE_DATES = [...DATES];
+    currentIndex = 0;
+    return;
+  }
+
+  // Otherwise apply normal cutoff logic
+  let targetDate = new Date(today);
   targetDate.setDate(today.getDate() + 1);
 
-  // Only apply extra shift if cutoff is NOT midnight
-  if (CUTOFF_HOUR > 0) {
-    const afterCutoff = now.getHours() >= CUTOFF_HOUR;
-    if (afterCutoff) {
-      targetDate.setDate(targetDate.getDate() + 1);
-    }
+  if (CUTOFF_HOUR > 0 && now.getHours() >= CUTOFF_HOUR) {
+    targetDate.setDate(targetDate.getDate() + 1);
   }
 
   const targetStr =
@@ -318,7 +327,7 @@ function applyCutoff() {
     String(targetDate.getMonth() + 1).padStart(2, '0') + '-' +
     String(targetDate.getDate()).padStart(2, '0');
 
-  VISIBLE_DATES = DATES.filter(d => d === targetStr);
+  VISIBLE_DATES = DATES.filter(d => d >= targetStr);
 
   currentIndex = 0;
 }
