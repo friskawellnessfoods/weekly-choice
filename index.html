@@ -283,7 +283,12 @@ async function fetchClient() {
 
   MENU = await menuRes.json();
 
-  DATES = Object.keys(MENU).sort();
+  DATES = Object.keys(MENU)
+  .filter(d => typeof d === "string" && d.includes("-"))
+  .sort();
+
+  console.log("DATES:", DATES);
+
   applyCutoff();
   initState();
   renderCurrentDay();
