@@ -348,6 +348,8 @@ function initState(){
 
     // Populate items
     ['option1','option2','breakfast'].forEach(sec => {
+      if (!MENU[date][sec]) return;
+      
       MENU[date][sec].forEach(item => {
         STATE[date].sections[sec].items[item.label] = {
           qty: 0,
@@ -356,22 +358,28 @@ function initState(){
       });
     });
 
-    MENU[date].snack.forEach(item => {
-      STATE[date].sections.snack.items[item.label] = {
-        qty: 0,
-        type: item.type,
-        label: item.label
+    if (MENU[date].snack) {
+      MENU[date].snack.forEach(item => {
+        STATE[date].sections.snack.items[item.label] = {
+          qty: 0,
+          type: item.type,
+          label: item.label
       };
     });
+  }
 
-    MENU[date].juice1.forEach(j => {
-      STATE[date].sections.juice1.items[j] = { qty: 0 };
+    if (MENU[date].juice1) {
+      MENU[date].juice1.forEach(j => {
+        STATE[date].sections.juice1.items[j] = { qty: 0 };
+      });
+  }
+
+    if (MENU[date].juice2) {
+      MENU[date].juice2.forEach(j => {
+        STATE[date].sections.juice2.items[j] = { qty: 0 };
     });
-
-    MENU[date].juice2.forEach(j => {
-      STATE[date].sections.juice2.items[j] = { qty: 0 };
-    });
-
+  }
+    
   });
 }
 
