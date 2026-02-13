@@ -234,7 +234,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzqOpS2OAnDFJIHpAUd7lwQkZdxXy21-jeH0E_4QiQRfE1DqIMA7wKrPQfcccbpYQ12/exec";  
+const API_URL = "https://script.google.com/macros/s/AKfycbxflrtrUYfksepAMsTqkmOXytvwHvaBNHbc2JnGOu7cWHc8nxrHAhaSoTcQ8WmUidmL/exec";  
 let CLIENT_LOCATION_1 = '';
 let CLIENT_LOCATION_2 = '';
 let CLIENT_DELIVERY = {};
@@ -252,7 +252,15 @@ async function fetchClient() {
   const phone = document.getElementById('phone').value.trim();
   if (!phone) return alert('Enter phone');
 
-  const res = await fetch(`${API_URL}?action=getClient&phone=${phone}`);
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "getClient",
+      phone: phone
+    })
+  });
+
   const data = await res.json();
 
   if (!data || !data.found) return alert('Client not found');
@@ -265,7 +273,14 @@ async function fetchClient() {
   CLIENT_LOCATION_2 = data.location2 || '';
   CLIENT_DELIVERY = data.delivery || {};
 
-  const menuRes = await fetch(`${API_URL}?action=getMenu`);
+  const menuRes = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "getMenu"
+    })
+  });
+
   MENU = await menuRes.json();
 
   DATES = Object.keys(MENU).sort();
@@ -273,7 +288,6 @@ async function fetchClient() {
   initState();
   renderCurrentDay();
 }
-
 
 /* ========= CUTOFF ========= */
 function applyCutoff() {
