@@ -399,7 +399,10 @@ function renderCurrentDay(){
     return;
   }
 
-  const dayName = new Date(date).toLocaleDateString('en-US',{ weekday:'long' });
+  const [y, m, d] = date.split('-').map(Number);
+  const parsedDate = new Date(y, m - 1, d);
+  const dayName = parsedDate.toLocaleDateString('en-US', { weekday: 'long' });
+
 
   container.innerHTML = `
     <div class="box">
