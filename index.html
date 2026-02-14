@@ -7,11 +7,6 @@
 
     <style>
   * { box-sizing: border-box; }
-      
-  .protein-chicken { color: #d32f2f; font-weight: 600; }
-  .protein-veg { color: #2e7d32; font-weight: 600; }
-  .protein-egg { color: #f9a825; font-weight: 600; }
-  .protein-seafood { color: #1565c0; font-weight: 600; }
 
   body {
     margin: 0;
@@ -595,7 +590,7 @@ function renderBlock(date, slot, title) {
 
   return headerHTML +
     Object.keys(items).map(label => `
-    <div class="dish-name">${formatDishLabel(slot, section.items[label], label)}</div>
+      <div class="dish">
         <div class="dish-name">${label}</div>
         <div class="qty">
           <button onclick="changeQty('${date}','${slot}','${label}',-1)">−</button>
@@ -606,44 +601,7 @@ function renderBlock(date, slot, title) {
     `).join('');
 }
 
-function getProteinClass(slot, item) {
 
-  // Only apply to Option 1 & Option 2
-  if (slot !== 'option1' && slot !== 'option2') return '';
-
-  if (!item || !item.protein) return '';
-
-  const p = item.protein.toLowerCase();
-
-  if (p.includes('chicken')) return 'protein-chicken';
-  if (p.includes('veg')) return 'protein-veg';
-  if (p.includes('egg')) return 'protein-egg';
-  if (p.includes('seafood')) return 'protein-seafood';
-
-  return '';
-}
-function formatDishLabel(slot, item, label) {
-
-  // Only color Option 1 & Option 2
-  if (slot !== 'option1' && slot !== 'option2') {
-    return label;
-  }
-
-  if (!item || !item.protein) {
-    return label;
-  }
-
-  const p = item.protein.toLowerCase();
-
-  let color = '';
-
-  if (p.includes('chicken')) color = '#d32f2f';
-  else if (p.includes('veg')) color = '#2e7d32';
-  else if (p.includes('egg')) color = '#f9a825';
-  else if (p.includes('seafood')) color = '#1565c0';
-
-  return `<span style="color:${color}; font-weight:600;">${label}</span>`;
-}
 
 function changeQty(d,s,l,delta){
   const obj = STATE[d].sections[s].items[l];
