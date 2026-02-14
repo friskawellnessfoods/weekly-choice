@@ -216,6 +216,14 @@
   body {
     touch-action: manipulation;
   }
+      
+  .day-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+
   </style>
 </head>
 
@@ -422,14 +430,21 @@ function renderCurrentDay(){
     return;
   }
 
-  const [y, m, d] = date.split('-').map(Number);
-  const parsedDate = new Date(y, m - 1, d);
-  const dayName = parsedDate.toLocaleDateString('en-US', { weekday: 'long' });
+  const parsedDate = new Date(date);
+
+const dayName = parsedDate.toLocaleDateString('en-US', {
+  weekday: 'long'
+});
+
+const formattedDate =
+  String(parsedDate.getDate()).padStart(2, '0') + '-' +
+  parsedDate.toLocaleDateString('en-US', { month: 'short' }) + '-' +
+  parsedDate.getFullYear();
 
 
   container.innerHTML = `
     <div class="box">
-      <h3>${dayName} (${date})</h3>
+      <h3 class="day-title">${dayName} (${formattedDate})</h3
       ${renderBlock(date,'breakfast','Breakfast')}
       ${renderBlock(date,'option1','Option 1')}
       ${renderBlock(date,'option2','Option 2')}
