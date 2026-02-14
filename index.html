@@ -1003,22 +1003,19 @@ function togglePreset(type, protein, checkbox) {
 
   Object.keys(STATE).forEach(date => {
 
-    if (VISIBLE_DATES.indexOf(date) < currentIndex) return;
-
     const sections = STATE[date].sections;
 
-    // ===== MEALS (Option1 + Option2) =====
-    if (type === "meals") {
+    /* =======================
+       MEALS (Option1 + Option2)
+    ======================== */
+    if (type === 'meals') {
 
-      ["option1", "option2"].forEach(slot => {
+      ['option1', 'option2'].forEach(slot => {
 
-        Object.keys(sections[slot].items).forEach(label => {
+        Object.values(sections[slot].items).forEach(item => {
 
-          const item = sections[slot].items[label];
-
-          if (item.protein?.toLowerCase() === protein) {
-            item.qty += isChecked ? 1 : -1;
-            if (item.qty < 0) item.qty = 0;
+          if (item.protein && item.protein.toLowerCase() === protein.toLowerCase()) {
+            item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
           }
 
         });
@@ -1027,55 +1024,66 @@ function togglePreset(type, protein, checkbox) {
 
     }
 
-    // ===== BREAKFAST =====
-    if (type === "breakfast") {
+    /* =======================
+       BREAKFAST
+    ======================== */
+    if (type === 'breakfast') {
 
-      Object.keys(sections.breakfast.items).forEach(label => {
+      Object.values(sections.breakfast.items).forEach(item => {
 
-        const item = sections.breakfast.items[label];
+        const label = (item.label || '').toLowerCase();
 
-        if (item.protein?.toLowerCase() === protein) {
-          item.qty += isChecked ? 1 : -1;
-          if (item.qty < 0) item.qty = 0;
+        // Veg Breakfast
+        if (protein === 'veg' && label.includes('veg')) {
+          item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
+        }
+
+        // Egg Breakfast
+        if (protein === 'breakfast' && label.includes('egg')) {
+          item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
         }
 
       });
 
     }
 
-    // ===== SNACK =====
-    if (type === "snack") {
+    /* =======================
+       SNACK
+    ======================== */
+    if (type === 'snack') {
 
-      Object.keys(sections.snack.items).forEach(label => {
+      Object.values(sections.snack.items).forEach(item => {
 
-        const item = sections.snack.items[label];
+        const snackType = (item.type || '').toLowerCase();
 
-        if (
-          protein === "all" ||
-          (protein === "veg" && item.type === "Veg Snack")
-        ) {
-          item.qty += isChecked ? 1 : -1;
-          if (item.qty < 0) item.qty = 0;
+        // Normal snack only
+        if (protein === 'all' && snackType === 'snack') {
+          item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
+        }
+
+        // Veg snack only
+        if (protein === 'veg' && snackType === 'veg snack') {
+          item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
         }
 
       });
 
     }
 
-    // ===== JUICE =====
-    if (type === "juice") {
+    /* =======================
+       JUICES
+    ======================== */
+    if (type === 'juice') {
 
-      ["juice1", "juice2"].forEach(j => {
+      if (protein === 'both') {
 
-        Object.keys(sections[j].items).forEach(label => {
-
-          const item = sections[j].items[label];
-          item.qty += isChecked ? 1 : -1;
-          if (item.qty < 0) item.qty = 0;
-
+        ['juice1','juice2'].forEach(j => {
+          Object.values(sections[j].items).forEach(item => {
+            item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
+          });
         });
 
-      });
+      }
 
     }
 
