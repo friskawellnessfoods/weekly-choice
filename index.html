@@ -742,6 +742,8 @@ function prevDay(){
   if (currentIndex > 0) {
     currentIndex--;
     renderCurrentDay();
+
+    window.scrollTo(0, 0);
   }
 }
 
