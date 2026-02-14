@@ -997,112 +997,90 @@ function showLoader() {
 function hideLoader() {
   document.getElementById("loader").style.display = "none";
 }
-function togglePreset(category, type, isChecked) {
+function togglePreset(type, protein, checkbox) {
 
-  for (let i = currentIndex; i < VISIBLE_DATES.length; i++) {
+  const isChecked = checkbox.checked;
 
-    const date = VISIBLE_DATES[i];
+  Object.keys(STATE).forEach(date => {
+
+    if (VISIBLE_DATES.indexOf(date) < currentIndex) return;
+
     const sections = STATE[date].sections;
 
-    // 🔹 MEALS (Option1 + Option2)
-    if (category === "meals") {
+    // ===== MEALS (Option1 + Option2) =====
+    if (type === "meals") {
 
-      ["option1", "option2"].forEach(secName => {
+      ["option1", "option2"].forEach(slot => {
 
-        const items = sections[secName].items || {};
+        Object.keys(sections[slot].items).forEach(label => {
 
-        Object.values(items).forEach(item => {
+          const item = sections[slot].items[label];
 
-          const protein = (item.protein || "").toLowerCase();
-
-          if (
-            (type === "chicken" && protein.includes("chicken")) ||
-            (type === "veg" && protein.includes("veg")) ||
-            (type === "seafood" && protein.includes("seafood")) ||
-            (type === "egg" && protein.includes("egg"))
-          ) {
-
-            if (isChecked) {
-              item.qty += 1;
-            } else {
-              item.qty = Math.max(0, item.qty - 1);
-            }
+          if (item.protein?.toLowerCase() === protein) {
+            item.qty += isChecked ? 1 : -1;
+            if (item.qty < 0) item.qty = 0;
           }
 
         });
 
       });
+
     }
 
-    // 🔹 SNACK
-    if (category === "snack") {
+    // ===== BREAKFAST =====
+    if (type === "breakfast") {
 
-      const items = sections.snack.items || {};
+      Object.keys(sections.breakfast.items).forEach(label => {
 
-      Object.values(items).forEach(item => {
+        const item = sections.breakfast.items[label];
 
-        const isVegSnack = item.type === "Veg Snack";
-
-        if (
-          (type === "all") ||
-          (type === "veg" && isVegSnack)
-        ) {
-          if (isChecked) {
-            item.qty += 1;
-          } else {
-            item.qty = Math.max(0, item.qty - 1);
-          }
+        if (item.protein?.toLowerCase() === protein) {
+          item.qty += isChecked ? 1 : -1;
+          if (item.qty < 0) item.qty = 0;
         }
 
       });
+
     }
 
-    // 🔹 JUICES
-    if (category === "juice") {
+    // ===== SNACK =====
+    if (type === "snack") {
 
-      ["juice1", "juice2"].forEach(secName => {
+      Object.keys(sections.snack.items).forEach(label => {
 
-        const items = sections[secName].items || {};
+        const item = sections.snack.items[label];
 
-        Object.values(items).forEach(item => {
+        if (
+          protein === "all" ||
+          (protein === "veg" && item.type === "Veg Snack")
+        ) {
+          item.qty += isChecked ? 1 : -1;
+          if (item.qty < 0) item.qty = 0;
+        }
 
-          if (isChecked) {
-            item.qty += 1;
-          } else {
-            item.qty = Math.max(0, item.qty - 1);
-          }
+      });
+
+    }
+
+    // ===== JUICE =====
+    if (type === "juice") {
+
+      ["juice1", "juice2"].forEach(j => {
+
+        Object.keys(sections[j].items).forEach(label => {
+
+          const item = sections[j].items[label];
+          item.qty += isChecked ? 1 : -1;
+          if (item.qty < 0) item.qty = 0;
 
         });
 
       });
+
     }
 
-    // 🔹 BREAKFAST
-    if (category === "breakfast") {
+  });
 
-      const items = sections.breakfast.items || {};
-
-      Object.values(items).forEach(item => {
-
-        const protein = (item.protein || "").toLowerCase();
-
-        if (
-          (type === "veg" && protein.includes("veg")) ||
-          (type === "egg" && protein.includes("egg"))
-        ) {
-          if (isChecked) {
-            item.qty += 1;
-          } else {
-            item.qty = Math.max(0, item.qty - 1);
-          }
-        }
-
-      });
-    }
-
-  }
-
-  // Re-render current day to reflect changes
   renderCurrentDay();
 }
 
