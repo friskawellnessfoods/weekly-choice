@@ -258,6 +258,17 @@
     font-size: 14px;
     white-space: nowrap;
   }
+
+  .nav-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.nav-row .btn {
+  flex: 1;
+}
+
       
   </style>
 </head>
@@ -289,8 +300,13 @@
 
 <div id="dayContainer"></div>
 
-<button id="nextBtn" class="btn secondary" onclick="nextDay()">Next Day</button>
+<div class="nav-row">
+  <button id="backBtn" class="btn secondary" onclick="prevDay()">Back</button>
+  <button id="nextBtn" class="btn secondary" onclick="nextDay()">Next Day</button>
+</div>
+
 <button class="btn" onclick="submitData(event)">Submit</button>
+
 
 </div>
 
@@ -511,7 +527,9 @@ const formattedDate =
     </div>
   `;
 
-  nextBtn.disabled = currentIndex === VISIBLE_DATES.length - 1;
+  backBtn.style.display = currentIndex > 0 ? 'block' : 'none';
+  nextBtn.style.display = currentIndex < VISIBLE_DATES.length - 1 ? 'block' : 'none';
+
 }
 
 function renderBlock(date, slot, title) {
@@ -623,6 +641,12 @@ function updateSectionLocation(date, section, value) {
 function nextDay(){
   if (currentIndex < VISIBLE_DATES.length - 1) {
     currentIndex++;
+    renderCurrentDay();
+  }
+}
+function prevDay(){
+  if (currentIndex > 0) {
+    currentIndex--;
     renderCurrentDay();
   }
 }
