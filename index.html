@@ -723,10 +723,18 @@ function renderBlock(date, slot, title) {
         <h4 class="section-title">${title}</h4>
         <div class="section-controls">
 
-          <select id="slot_${date}_${slot}"
-            onchange="updateSectionSlot('${date}','${slot}',this.value)">
-            <option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>
-            <option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>
+          <select id="loc_${date}_${slot}"
+            onchange="updateSectionLocation('${date}','${slot}',this.value)">
+            <option value="">Location</option>
+            ${CLIENT_LOCATION_1 ? `<option value="${CLIENT_LOCATION_1}" 
+              ${(slot === 'option1' && !section.location) ? 'selected' : ''}>
+              ${CLIENT_LOCATION_1}
+            </option>` : ''}
+          
+            ${CLIENT_LOCATION_2 ? `<option value="${CLIENT_LOCATION_2}" 
+              ${(slot === 'option2' && !section.location) ? 'selected' : ''}>
+              ${CLIENT_LOCATION_2}
+            </option>` : ''}
           </select>
 
           ${showLocationControl ? `
@@ -742,6 +750,15 @@ function renderBlock(date, slot, title) {
     `;
   } else {
     headerHTML = `<h4>${title}</h4>`;
+  }
+
+  if (!section.location) {
+    if (slot === 'option1' && CLIENT_LOCATION_1) {
+      section.location = CLIENT_LOCATION_1;
+    }
+    if (slot === 'option2' && CLIENT_LOCATION_2) {
+      section.location = CLIENT_LOCATION_2;
+    }
   }
 
   return headerHTML +
