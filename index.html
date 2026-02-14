@@ -166,13 +166,24 @@
   }
 
   .qty button {
-    width: 36px;             /* slightly larger tap target */
-    height: 36px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: none;
-    background: #e4e4e4;
-  }
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  border-radius: 50%;              /* perfect round */
+  border: none;
+  background: #e9e9e9;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.qty button:active {
+  transform: scale(0.92);
+  background: #dcdcdc;
+}
+
 
   .qty span {
     min-width: 24px;
