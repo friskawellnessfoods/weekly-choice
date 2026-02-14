@@ -511,7 +511,19 @@ async function fetchClient() {
 
   clientName.value = client.clientName || '';
   clientType.value = client.mealType || '';
-  clientRemarks.value = client.remarks || '';
+  const originalRemarks = client.remarks || '';
+
+  // remove all digits and clean extra spaces
+  const cleanedRemarks = originalRemarks
+    .replace(/\d+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  clientRemarks.value = cleanedRemarks;
+  
+  // store original for backend saving
+  clientRemarks.dataset.original = originalRemarks;
+
 
   CLIENT_LOCATION_1 = client.location1 || '';
   CLIENT_LOCATION_2 = client.location2 || '';
@@ -882,7 +894,7 @@ async function saveCurrentDay(btn) {
 
   const payload = {
     phone,
-    remarks: clientRemarks.value || '',
+    remarks: clientRemarks.dataset.original || clientRemarks.value || '',
     days: [{
       date,
       sections: STATE[date].sections,
