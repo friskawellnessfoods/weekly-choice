@@ -235,7 +235,27 @@
     font-weight: 700;
     margin-bottom: 18px;
   }
+.day-header {
+  position: relative;
+  margin-bottom: 18px;
+}
 
+.day-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.cancel-box {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
   </style>
 </head>
 
@@ -456,17 +476,26 @@ const formattedDate =
 
   container.innerHTML = `
     <div class="box">
-      <h3 class="day-title">${dayName} (${formattedDate})</h3
+     
+      <div class="day-header">
+        <div class="day-title">
+          ${dayName} (${formattedDate})
+        </div>
+      
+        <label class="cancel-box">
+          <input type="checkbox"
+            onchange="STATE['${date}'].cancel=this.checked">
+          Cancel this day
+        </label>
+      </div>
+
       ${renderBlock(date,'breakfast','Breakfast')}
       ${renderBlock(date,'option1','Option 1')}
       ${renderBlock(date,'option2','Option 2')}
       ${renderBlock(date,'snack','Snack')}
       ${renderBlock(date,'juice1','Juice 1')}
       ${renderBlock(date,'juice2','Juice 2')}
-      <label>
-        <input type="checkbox"
-          onchange="STATE['${date}'].cancel=this.checked"> Cancel this day
-      </label>
+      
      ${!hasAfternoonEveningSlots() ? `
       <label>Location</label>
       <select id="loc_${date}">
