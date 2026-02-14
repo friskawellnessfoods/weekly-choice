@@ -755,9 +755,33 @@ function renderBlock(date, slot, title) {
           ${showLocationControl ? `
             <select id="loc_${date}_${slot}"
               onchange="updateSectionLocation('${date}','${slot}',this.value)">
-              <option value="">Location</option>
-              ${locOptions}
+            
+              ${CLIENT_LOCATION_1 ? `
+                <option value="${CLIENT_LOCATION_1}"
+                  ${
+                    section.location === CLIENT_LOCATION_1 ||
+                    (!section.location && slot === 'option1')
+                      ? 'selected'
+                      : ''
+                  }>
+                  ${CLIENT_LOCATION_1}
+                </option>
+              ` : ''}
+            
+              ${CLIENT_LOCATION_2 ? `
+                <option value="${CLIENT_LOCATION_2}"
+                  ${
+                    section.location === CLIENT_LOCATION_2 ||
+                    (!section.location && slot === 'option2')
+                      ? 'selected'
+                      : ''
+                  }>
+                  ${CLIENT_LOCATION_2}
+                </option>
+              ` : ''}
+            
             </select>
+
           ` : ``}
 
         </div>
