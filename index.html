@@ -228,34 +228,37 @@
   body {
     touch-action: manipulation;
   }
-      
-  .day-title {
+  .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .day-text {
+    flex: 1;
     text-align: center;
+  }
+
+  .day-name {
     font-size: 20px;
     font-weight: 700;
-    margin-bottom: 18px;
   }
-.day-header {
-  position: relative;
-  margin-bottom: 18px;
-}
 
-.day-title {
-  text-align: center;
-  font-size: 20px;
-  font-weight: 700;
-}
+  .day-date {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+  }
 
-.cancel-box {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+  .cancel-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+      
   </style>
 </head>
 
@@ -477,17 +480,18 @@ const formattedDate =
   container.innerHTML = `
     <div class="box">
      
-      <div class="day-header">
-        <div class="day-title">
-          ${dayName} (${formattedDate})
-        </div>
-      
-        <label class="cancel-box">
-          <input type="checkbox"
-            onchange="STATE['${date}'].cancel=this.checked">
-          Cancel this day
-        </label>
+    <div class="day-header">
+      <div class="day-text">
+        <div class="day-name">${dayName}</div>
+        <div class="day-date">${formattedDate}</div>
       </div>
+    
+      <label class="cancel-wrap">
+        <input type="checkbox"
+          onchange="STATE['${date}'].cancel=this.checked">
+        Cancel
+      </label>
+    </div>
 
       ${renderBlock(date,'breakfast','Breakfast')}
       ${renderBlock(date,'option1','Option 1')}
