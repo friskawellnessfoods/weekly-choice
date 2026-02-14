@@ -401,7 +401,7 @@
 
       <!-- BREAKFAST -->
       <label><input type="checkbox" onchange="togglePreset('breakfast','veg',this)"> Veg Breakfast</label>
-      <label><input type="checkbox" onchange="togglePreset('breakfast','',this)"> Breakfast (Egg)</label>
+      <label><input type="checkbox" onchange="togglePreset('breakfast','breakfast',this)"> Breakfast (Egg)</label>
 
       <!-- SNACK -->
       <label><input type="checkbox" onchange="togglePreset('snack','all',this)"> Snack Everyday</label>
@@ -417,29 +417,6 @@
 </div>
 
 <div id="dayContainer"></div>
-</div>
-
-<div class="box">
-  <details>
-    <summary style="font-weight:600; cursor:pointer;">Presets</summary>
-
-    <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
-
-      <label><input type="checkbox" onchange="togglePreset('meals','chicken',this.checked)"> Both Chicken Meals Everyday</label>
-      <label><input type="checkbox" onchange="togglePreset('meals','veg',this.checked)"> Both Veg Meals Everyday</label>
-      <label><input type="checkbox" onchange="togglePreset('meals','seafood',this.checked)"> Both Seafood Meals Everyday</label>
-      <label><input type="checkbox" onchange="togglePreset('meals','egg',this.checked)"> One Egg Meal Everyday</label>
-
-      <label><input type="checkbox" onchange="togglePreset('snack','all',this.checked)"> Snack Everyday</label>
-      <label><input type="checkbox" onchange="togglePreset('snack','veg',this.checked)"> Veg Snack Everyday</label>
-
-      <label><input type="checkbox" onchange="togglePreset('juice','both',this.checked)"> Both Juices Everyday</label>
-
-      <label><input type="checkbox" onchange="togglePreset('breakfast','veg',this.checked)"> Veg Breakfast Everyday</label>
-      <label><input type="checkbox" onchange="togglePreset('breakfast','egg',this.checked)"> Breakfast (Egg) Everyday</label>
-
-    </div>
-  </details>
 </div>
 
 <div id="dayContainer"></div>
