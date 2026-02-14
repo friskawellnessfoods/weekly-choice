@@ -333,10 +333,30 @@
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
 }
+
+.btn.loading::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: spinBtn 0.6s linear infinite;
+}
+
+@keyframes spinBtn {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
       
   </style>
 </head>
@@ -354,7 +374,7 @@
   <label>Phone</label>
   <input id="phone" inputmode="numeric"
          onkeydown="if(event.key==='Enter'){fetchClient()}">
-  <button class="btn" onclick="fetchClient()">Fetch Client</button>
+  <button class="btn" onclick="fetchClient(event)">Fetch Client</button>
 
   <label style="margin-top:24px;">Client Name</label>
   <input type="text" id="clientName" readonly>
@@ -370,10 +390,10 @@
 
 <div class="nav-row">
   <button id="backBtn" class="btn secondary" onclick="prevDay()">Back</button>
-  <button id="nextBtn" class="btn secondary" onclick="nextDay()">Next Day</button>
+  <button id="nextBtn" class="btn secondary" onclick="nextDay(event)">Next Day</button>
 </div>
   
-<button class="btn" onclick="handleSubmit()">Submit</button>
+<button class="btn" onclick="handleSubmit(event)">Submit</button>
 </div>
 
 <script>
@@ -393,10 +413,14 @@ let currentIndex = 0;
 /* ========= FETCH ========= */
 async function fetchClient() {
 
-  const phone = document.getElementById('phone').value.trim();
-  if (!phone) return alert('Enter phone');
+  const btn = event.target;
+  btn.classList.add("loading");
 
-  showLoader();
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) {
+    btn.classList.remove("loading");
+    return alert('Enter phone');
+  }
 
   const params = new URLSearchParams();
   params.append("action", "getClient");
@@ -409,7 +433,7 @@ async function fetchClient() {
 
   const data = await res.json();
 
-  hideLoader();
+  btn.classList.remove("loading");
 
   if (!data || !data.client || !data.client.found)
     return alert('Client not found');
@@ -425,12 +449,12 @@ async function fetchClient() {
   CLIENT_DELIVERY = client.delivery || {};
 
   MENU = data.menu || {};
-
   DATES = Object.keys(MENU).sort();
   applyCutoff();
   initState();
   renderCurrentDay();
 }
+
 
 /* ========= CUTOFF ========= */
 function applyCutoff() {
@@ -699,10 +723,10 @@ function updateSectionSlot(date, section, value) {
 function updateSectionLocation(date, section, value) {
   STATE[date].sections[section].location = value;
 }
+async function nextDay(event){
 
-async function nextDay(){
-
-  const result = await saveCurrentDay();
+  const btn = event.target;
+  const result = await saveCurrentDay(btn);
 
   if (!result.success) {
     alert("Save failed");
@@ -714,8 +738,6 @@ async function nextDay(){
     renderCurrentDay();
   }
 }
-
-
 function prevDay(){
   if (currentIndex > 0) {
     currentIndex--;
@@ -724,13 +746,13 @@ function prevDay(){
 }
 
 /* ========= SUBMIT ========= */
-async function saveCurrentDay() {
+async function saveCurrentDay(btn) {
 
-  showLoader();
+  if (btn) btn.classList.add("loading");
 
   const phone = document.getElementById('phone').value.trim();
   if (!phone) {
-    hideLoader();
+    if (btn) btn.classList.remove("loading");
     alert('Phone missing');
     return { success: false };
   }
@@ -760,26 +782,31 @@ async function saveCurrentDay() {
 
     const result = await res.json();
 
-    hideLoader();
+    if (btn) btn.classList.remove("loading");
     return result;
 
   } catch (error) {
 
-    hideLoader();
+    if (btn) btn.classList.remove("loading");
     alert("Network error");
     return { success: false };
   }
 }
 
-async function handleSubmit() {
-  const result = await saveCurrentDay();
+
+async function handleSubmit(event) {
+
+  const btn = event.target;
+
+  const result = await saveCurrentDay(btn);
 
   if (result.success) {
     generateSummary();
   } else {
     alert("Save failed");
   }
-}  
+}
+
 function getProteinClass(slot, item) {
 
   // Only apply to Option 1 & Option 2
@@ -910,9 +937,6 @@ function hideLoader() {
     <div id="summaryContent"></div>
     <button class="btn" onclick="closeSummary()">Close</button>
   </div>
-</div>
-  <div id="loader" class="loader">
-  <div class="spinner"></div>
 </div>
 </body>
 </html>
