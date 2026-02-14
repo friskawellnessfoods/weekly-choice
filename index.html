@@ -272,7 +272,50 @@
 .protein-veg { color: #2e7d32; font-weight: 600; }
 .protein-egg { color: #f9a825; font-weight: 600; }
 .protein-seafood { color: #1565c0; font-weight: 600; }
-    
+
+/* ===== SUMMARY MODAL ===== */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-content h3 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.summary-day {
+  margin-bottom: 18px;
+}
+
+.summary-day h4 {
+  margin-bottom: 6px;
+}
+
+.summary-slot {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+      
   </style>
 </head>
 
@@ -692,7 +735,7 @@ async function handleSubmit() {
   const result = await saveCurrentDay();
 
   if (result.success) {
-    alert("Saved successfully");
+    generateSummary();
   } else {
     alert("Save failed");
   }
@@ -715,7 +758,82 @@ function getProteinClass(slot, item) {
 
   return '';
 }
+function generateSummary() {
+  let html = "";
+
+  VISIBLE_DATES.forEach(date => {
+    const dayState = STATE[date];
+
+    if (!dayState) return;
+
+    const hasSelection =
+      dayState.cancel ||
+      Object.values(dayState.sections).some(sec =>
+        Object.values(sec.items || {}).some(i => i.qty > 0)
+      );
+
+    if (!hasSelection) return;
+
+    const dayName = new Date(date).toLocaleDateString('en-US',{ weekday:'long' });
+
+    html += `<div class="summary-day">`;
+    html += `<h4>${dayName} – ${date}</h4>`;
+
+    if (dayState.cancel) {
+      html += `<div>❌ Cancelled</div>`;
+      html += `</div>`;
+      return;
+    }
+
+    Object.entries(dayState.sections).forEach(([key, sec]) => {
+
+      const selectedItems = Object.entries(sec.items || {})
+        .filter(([_, item]) => item.qty > 0);
+
+      if (!selectedItems.length) return;
+
+      const showSlot = hasAfternoonEveningSlots();
+      const showLocation = !!CLIENT_LOCATION_2;
+
+      if (showSlot || showLocation) {
+        html += `<div class="summary-slot">`;
+
+        if (showSlot) {
+          html += `🕒 ${sec.slot}`;
+        }
+
+        if (showLocation && sec.location) {
+          html += showSlot ? ` – ${sec.location}` : `${sec.location}`;
+        }
+
+        html += `</div>`;
+      }
+
+      selectedItems.forEach(([label, item]) => {
+        html += `<div>• ${item.qty > 1 ? item.qty + 'x ' : ''}${label}</div>`;
+      });
+
+    });
+
+    html += `</div>`;
+  });
+
+  document.getElementById("summaryContent").innerHTML = html;
+  document.getElementById("summaryModal").style.display = "flex";
+}
+
+function closeSummary() {
+  document.getElementById("summaryModal").style.display = "none";
+}
+
 </script>
   </div>
+  <div id="summaryModal" class="modal">
+  <div class="modal-content">
+    <h3>Order Summary</h3>
+    <div id="summaryContent"></div>
+    <button class="btn" onclick="closeSummary()">Close</button>
+  </div>
+</div>
 </body>
 </html>
