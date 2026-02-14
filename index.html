@@ -757,6 +757,24 @@ function prevDay(){
   }
 }
 
+function hasSelectionForDate(date) {
+
+  const day = STATE[date];
+  if (!day) return false;
+
+  if (day.cancel) return true;
+
+  const sections = day.sections;
+
+  for (let sec in sections) {
+    const items = sections[sec].items || {};
+    for (let key in items) {
+      if (items[key].qty > 0) return true;
+    }
+  }
+
+  return false;
+}
 
 /* ========= SUBMIT ========= */
 async function saveCurrentDay(btn) {
@@ -771,6 +789,12 @@ async function saveCurrentDay(btn) {
   }
 
   const date = VISIBLE_DATES[currentIndex];
+
+  // 🔴 IMPORTANT FIX — Skip backend if nothing selected
+  if (!hasSelectionForDate(date)) {
+    if (btn) btn.classList.remove("loading");
+    return { success: true };
+  }
 
   const payload = {
     phone,
@@ -805,7 +829,6 @@ async function saveCurrentDay(btn) {
     return { success: false };
   }
 }
-
 
 async function handleSubmit(event) {
 
