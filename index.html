@@ -687,6 +687,7 @@ const formattedDate =
 }
 
 function renderBlock(date, slot, title) {
+
   const section = STATE[date].sections[slot];
   const items = section?.items;
   if (!items || !Object.keys(items).length) return '';
@@ -697,6 +698,16 @@ function renderBlock(date, slot, title) {
   const showLocationControl =
     hasAfternoonEveningSlots() &&
     (slot === 'option1' || slot === 'option2');
+
+  // ✅ Set default location safely BEFORE rendering
+  if (hasAfternoonEveningSlots() && !section.location) {
+    if (slot === 'option1' && CLIENT_LOCATION_1) {
+      section.location = CLIENT_LOCATION_1;
+    }
+    if (slot === 'option2' && CLIENT_LOCATION_2) {
+      section.location = CLIENT_LOCATION_2;
+    }
+  }
 
   let headerHTML = '';
 
@@ -723,18 +734,10 @@ function renderBlock(date, slot, title) {
         <h4 class="section-title">${title}</h4>
         <div class="section-controls">
 
-          <select id="loc_${date}_${slot}"
-            onchange="updateSectionLocation('${date}','${slot}',this.value)">
-            <option value="">Location</option>
-            ${CLIENT_LOCATION_1 ? `<option value="${CLIENT_LOCATION_1}" 
-              ${(slot === 'option1' && !section.location) ? 'selected' : ''}>
-              ${CLIENT_LOCATION_1}
-            </option>` : ''}
-          
-            ${CLIENT_LOCATION_2 ? `<option value="${CLIENT_LOCATION_2}" 
-              ${(slot === 'option2' && !section.location) ? 'selected' : ''}>
-              ${CLIENT_LOCATION_2}
-            </option>` : ''}
+          <select id="slot_${date}_${slot}"
+            onchange="updateSectionSlot('${date}','${slot}',this.value)">
+            <option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>
+            <option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>
           </select>
 
           ${showLocationControl ? `
@@ -748,10 +751,12 @@ function renderBlock(date, slot, title) {
         </div>
       </div>
     `;
-  } else {
-    headerHTML = `<h4>${title}</h4>`;
-  }
 
+  } else {
+
+    headerHTML = `<h4>${title}</h4>`;
+
+  }
 
   return headerHTML +
     Object.keys(items).map(label => `
@@ -767,6 +772,7 @@ function renderBlock(date, slot, title) {
       </div>
     `).join('');
 }
+
 
 
 
