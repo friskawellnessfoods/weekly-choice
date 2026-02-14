@@ -683,13 +683,26 @@ const formattedDate =
       ${renderBlock(date,'juice2','Juice 2')}
       
      ${!hasAfternoonEveningSlots() ? `
-      <label>Location</label>
-      <select id="loc_${date}">
-        <option value="">Select Location</option>
-        ${CLIENT_LOCATION_1 ? `<option value="${CLIENT_LOCATION_1.replace(/"/g,'&quot;')}">${CLIENT_LOCATION_1}</option>` : ''}
-        ${CLIENT_LOCATION_2 ? `<option value="${CLIENT_LOCATION_2.replace(/"/g,'&quot;')}">${CLIENT_LOCATION_2}</option>` : ''}
-      </select>
+        <label>Location</label>
+        <select id="loc_${date}"
+          onchange="STATE['${date}'].sections.option1.location=this.value">
+      
+          ${CLIENT_LOCATION_1 ? `
+            <option value="${CLIENT_LOCATION_1}"
+              ${!CLIENT_LOCATION_2 ? 'selected' : ''}>
+              ${CLIENT_LOCATION_1}
+            </option>
+          ` : ''}
+      
+          ${CLIENT_LOCATION_2 ? `
+            <option value="${CLIENT_LOCATION_2}">
+              ${CLIENT_LOCATION_2}
+            </option>
+          ` : ''}
+      
+        </select>
       ` : ``}
+
     </div>
   `;
 
