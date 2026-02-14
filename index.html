@@ -1030,22 +1030,23 @@ function togglePreset(type, protein, checkbox) {
     if (type === 'breakfast') {
 
       Object.values(sections.breakfast.items).forEach(item => {
-
-        const label = (item.label || '').toLowerCase();
-
-        // Veg Breakfast
-        if (protein === 'veg' && label.includes('veg')) {
+    
+        const proteinType = item.protein.toLowerCase().trim();
+    
+        // Veg Breakfast preset
+        if (protein === 'veg' && proteinType === 'veg breakfast') {
           item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
         }
-
-        // Egg Breakfast
-        if (protein === 'breakfast' && label.includes('egg')) {
+    
+        // Breakfast (Egg) preset
+        if (protein === 'breakfast' && proteinType === 'breakfast') {
           item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
         }
-
+    
       });
-
+    
     }
+
 
     /* =======================
        SNACK
