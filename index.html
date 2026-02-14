@@ -736,13 +736,13 @@ async function nextDay(event){
   if (currentIndex < VISIBLE_DATES.length - 1) {
     currentIndex++;
     renderCurrentDay();
+    window.scrollTo(0, 0);
   }
 }
 function prevDay(){
   if (currentIndex > 0) {
     currentIndex--;
     renderCurrentDay();
-
     window.scrollTo(0, 0);
   }
 }
