@@ -762,8 +762,8 @@ function generateSummary() {
   let html = "";
 
   VISIBLE_DATES.forEach(date => {
-    const dayState = STATE[date];
 
+    const dayState = STATE[date];
     if (!dayState) return;
 
     const hasSelection =
@@ -774,43 +774,71 @@ function generateSummary() {
 
     if (!hasSelection) return;
 
-    const dayName = new Date(date).toLocaleDateString('en-US',{ weekday:'long' });
+    const dayName = new Date(date)
+      .toLocaleDateString('en-US',{ weekday:'long' });
 
     html += `<div class="summary-day">`;
     html += `<h4>${dayName} – ${date}</h4>`;
 
     if (dayState.cancel) {
-      html += `<div>❌ Cancelled</div>`;
-      html += `</div>`;
+      html += `<div>❌ Cancelled</div></div>`;
       return;
     }
 
-    Object.entries(dayState.sections).forEach(([key, sec]) => {
+    // 🔹 GROUP BY SLOT + LOCATION
+    const grouped = {};
+
+    Object.values(dayState.sections).forEach(sec => {
 
       const selectedItems = Object.entries(sec.items || {})
         .filter(([_, item]) => item.qty > 0);
 
       if (!selectedItems.length) return;
 
+      const key = (sec.slot || '') + "||" + (sec.location || '');
+
+      if (!grouped[key]) {
+        grouped[key] = {
+          slot: sec.slot || '',
+          location: sec.location || '',
+          items: []
+        };
+      }
+
+      selectedItems.forEach(([label, item]) => {
+        grouped[key].items.push({
+          label,
+          qty: item.qty
+        });
+      });
+
+    });
+
+    // 🔹 RENDER GROUPED OUTPUT
+    Object.values(grouped).forEach(group => {
+
       const showSlot = hasAfternoonEveningSlots();
       const showLocation = !!CLIENT_LOCATION_2;
 
       if (showSlot || showLocation) {
+
         html += `<div class="summary-slot">`;
 
-        if (showSlot) {
-          html += `🕒 ${sec.slot}`;
+        if (showSlot && group.slot) {
+          html += `🕒 ${group.slot}`;
         }
 
-        if (showLocation && sec.location) {
-          html += showSlot ? ` – ${sec.location}` : `${sec.location}`;
+        if (showLocation && group.location) {
+          html += showSlot
+            ? ` – ${group.location}`
+            : `${group.location}`;
         }
 
         html += `</div>`;
       }
 
-      selectedItems.forEach(([label, item]) => {
-        html += `<div>• ${item.qty > 1 ? item.qty + 'x ' : ''}${label}</div>`;
+      group.items.forEach(item => {
+        html += `<div>• ${item.qty > 1 ? item.qty + 'x ' : ''}${item.label}</div>`;
       });
 
     });
@@ -821,6 +849,7 @@ function generateSummary() {
   document.getElementById("summaryContent").innerHTML = html;
   document.getElementById("summaryModal").style.display = "flex";
 }
+
 
 function closeSummary() {
   document.getElementById("summaryModal").style.display = "none";
