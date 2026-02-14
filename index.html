@@ -315,6 +315,28 @@
   margin-bottom: 4px;
 }
 
+.loader {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ddd;
+  border-top: 4px solid #1976d2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
       
   </style>
 </head>
@@ -370,8 +392,11 @@ let currentIndex = 0;
 
 /* ========= FETCH ========= */
 async function fetchClient() {
+
   const phone = document.getElementById('phone').value.trim();
   if (!phone) return alert('Enter phone');
+
+  showLoader();
 
   const params = new URLSearchParams();
   params.append("action", "getClient");
@@ -384,32 +409,24 @@ async function fetchClient() {
 
   const data = await res.json();
 
-  if (!data || !data.found) return alert('Client not found');
+  hideLoader();
 
-  clientName.value = data.clientName || '';
-  clientType.value = data.mealType || '';
-  clientRemarks.value = data.remarks || '';
+  if (!data || !data.client || !data.client.found)
+    return alert('Client not found');
 
-  CLIENT_LOCATION_1 = data.location1 || '';
-  CLIENT_LOCATION_2 = data.location2 || '';
-  CLIENT_DELIVERY = data.delivery || {};
+  const client = data.client;
 
-  const menuParams = new URLSearchParams();
-  menuParams.append("action", "getMenu");
+  clientName.value = client.clientName || '';
+  clientType.value = client.mealType || '';
+  clientRemarks.value = client.remarks || '';
 
-  const menuRes = await fetch(API_URL, {
-    method: "POST",
-    body: menuParams
-  });
+  CLIENT_LOCATION_1 = client.location1 || '';
+  CLIENT_LOCATION_2 = client.location2 || '';
+  CLIENT_DELIVERY = client.delivery || {};
 
-  MENU = await menuRes.json();
+  MENU = data.menu || {};
 
-  DATES = Object.keys(MENU)
-  .filter(d => typeof d === "string" && d.includes("-"))
-  .sort();
-
-  console.log("DATES:", DATES);
-
+  DATES = Object.keys(MENU).sort();
   applyCutoff();
   initState();
   renderCurrentDay();
@@ -683,17 +700,21 @@ function updateSectionLocation(date, section, value) {
   STATE[date].sections[section].location = value;
 }
 
-
 async function nextDay(){
 
   const result = await saveCurrentDay();
-  if (!result.success) return;
+
+  if (!result.success) {
+    alert("Save failed");
+    return;
+  }
 
   if (currentIndex < VISIBLE_DATES.length - 1) {
     currentIndex++;
     renderCurrentDay();
   }
 }
+
 
 function prevDay(){
   if (currentIndex > 0) {
@@ -705,8 +726,14 @@ function prevDay(){
 /* ========= SUBMIT ========= */
 async function saveCurrentDay() {
 
+  showLoader();
+
   const phone = document.getElementById('phone').value.trim();
-  if (!phone) return alert('Phone missing');
+  if (!phone) {
+    hideLoader();
+    alert('Phone missing');
+    return { success: false };
+  }
 
   const date = VISIBLE_DATES[currentIndex];
 
@@ -724,13 +751,26 @@ async function saveCurrentDay() {
   params.append("action", "submitOrder");
   params.append("payload", JSON.stringify(payload));
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    body: params
-  });
+  try {
 
-  return await res.json();
-} 
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: params
+    });
+
+    const result = await res.json();
+
+    hideLoader();
+    return result;
+
+  } catch (error) {
+
+    hideLoader();
+    alert("Network error");
+    return { success: false };
+  }
+}
+
 async function handleSubmit() {
   const result = await saveCurrentDay();
 
@@ -854,6 +894,13 @@ function generateSummary() {
 function closeSummary() {
   document.getElementById("summaryModal").style.display = "none";
 }
+function showLoader() {
+  document.getElementById("loader").style.display = "flex";
+}
+
+function hideLoader() {
+  document.getElementById("loader").style.display = "none";
+}
 
 </script>
   </div>
@@ -863,6 +910,9 @@ function closeSummary() {
     <div id="summaryContent"></div>
     <button class="btn" onclick="closeSummary()">Close</button>
   </div>
+</div>
+  <div id="loader" class="loader">
+  <div class="spinner"></div>
 </div>
 </body>
 </html>
