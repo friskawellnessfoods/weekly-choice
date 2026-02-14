@@ -595,9 +595,7 @@ function renderBlock(date, slot, title) {
 
   return headerHTML +
     Object.keys(items).map(label => `
-      <div class="dish-name ${getProteinClass(slot, section.items[label])}">
-        ${label}
-      </div>
+    <div class="dish-name">${formatDishLabel(slot, section.items[label], label)}</div>
         <div class="dish-name">${label}</div>
         <div class="qty">
           <button onclick="changeQty('${date}','${slot}','${label}',-1)">−</button>
@@ -624,7 +622,28 @@ function getProteinClass(slot, item) {
 
   return '';
 }
+function formatDishLabel(slot, item, label) {
 
+  // Only color Option 1 & Option 2
+  if (slot !== 'option1' && slot !== 'option2') {
+    return label;
+  }
+
+  if (!item || !item.protein) {
+    return label;
+  }
+
+  const p = item.protein.toLowerCase();
+
+  let color = '';
+
+  if (p.includes('chicken')) color = '#d32f2f';
+  else if (p.includes('veg')) color = '#2e7d32';
+  else if (p.includes('egg')) color = '#f9a825';
+  else if (p.includes('seafood')) color = '#1565c0';
+
+  return `<span style="color:${color}; font-weight:600;">${label}</span>`;
+}
 
 function changeQty(d,s,l,delta){
   const obj = STATE[d].sections[s].items[l];
