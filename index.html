@@ -510,19 +510,19 @@ async function fetchClient() {
   const client = data.client;
 
   clientName.value = client.clientName || '';
-  clientType.value = client.mealType || '';
-  const originalRemarks = client.remarks || '';
+  const originalType = client.mealType || '';
 
-  // remove all digits and clean extra spaces
-  const cleanedRemarks = originalRemarks
+  const cleanedType = originalType
     .replace(/\d+/g, '')
     .replace(/\s+/g, ' ')
     .trim();
   
-  clientRemarks.value = cleanedRemarks;
+  clientType.value = cleanedType;
   
-  // store original for backend saving
-  clientRemarks.dataset.original = originalRemarks;
+  clientRemarks.value = client.remarks || '';
+   
+  // store original for backend
+  clientType.dataset.original = originalType,
 
 
   CLIENT_LOCATION_1 = client.location1 || '';
