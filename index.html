@@ -387,6 +387,32 @@
 </div>
 
 <div id="dayContainer"></div>
+</div>
+
+<div class="box">
+  <details>
+    <summary style="font-weight:600; cursor:pointer;">Presets</summary>
+
+    <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+
+      <label><input type="checkbox" onchange="togglePreset('meals','chicken',this.checked)"> Both Chicken Meals Everyday</label>
+      <label><input type="checkbox" onchange="togglePreset('meals','veg',this.checked)"> Both Veg Meals Everyday</label>
+      <label><input type="checkbox" onchange="togglePreset('meals','seafood',this.checked)"> Both Seafood Meals Everyday</label>
+      <label><input type="checkbox" onchange="togglePreset('meals','egg',this.checked)"> One Egg Meal Everyday</label>
+
+      <label><input type="checkbox" onchange="togglePreset('snack','all',this.checked)"> Snack Everyday</label>
+      <label><input type="checkbox" onchange="togglePreset('snack','veg',this.checked)"> Veg Snack Everyday</label>
+
+      <label><input type="checkbox" onchange="togglePreset('juice','both',this.checked)"> Both Juices Everyday</label>
+
+      <label><input type="checkbox" onchange="togglePreset('breakfast','veg',this.checked)"> Veg Breakfast Everyday</label>
+      <label><input type="checkbox" onchange="togglePreset('breakfast','egg',this.checked)"> Breakfast (Egg) Everyday</label>
+
+    </div>
+  </details>
+</div>
+
+<div id="dayContainer"></div>
 
 <div class="nav-row">
   <button id="backBtn" class="btn secondary" onclick="prevDay()">Back</button>
@@ -963,6 +989,114 @@ function showLoader() {
 
 function hideLoader() {
   document.getElementById("loader").style.display = "none";
+}
+function togglePreset(category, type, isChecked) {
+
+  for (let i = currentIndex; i < VISIBLE_DATES.length; i++) {
+
+    const date = VISIBLE_DATES[i];
+    const sections = STATE[date].sections;
+
+    // 🔹 MEALS (Option1 + Option2)
+    if (category === "meals") {
+
+      ["option1", "option2"].forEach(secName => {
+
+        const items = sections[secName].items || {};
+
+        Object.values(items).forEach(item => {
+
+          const protein = (item.protein || "").toLowerCase();
+
+          if (
+            (type === "chicken" && protein.includes("chicken")) ||
+            (type === "veg" && protein.includes("veg")) ||
+            (type === "seafood" && protein.includes("seafood")) ||
+            (type === "egg" && protein.includes("egg"))
+          ) {
+
+            if (isChecked) {
+              item.qty += 1;
+            } else {
+              item.qty = Math.max(0, item.qty - 1);
+            }
+          }
+
+        });
+
+      });
+    }
+
+    // 🔹 SNACK
+    if (category === "snack") {
+
+      const items = sections.snack.items || {};
+
+      Object.values(items).forEach(item => {
+
+        const isVegSnack = item.type === "Veg Snack";
+
+        if (
+          (type === "all") ||
+          (type === "veg" && isVegSnack)
+        ) {
+          if (isChecked) {
+            item.qty += 1;
+          } else {
+            item.qty = Math.max(0, item.qty - 1);
+          }
+        }
+
+      });
+    }
+
+    // 🔹 JUICES
+    if (category === "juice") {
+
+      ["juice1", "juice2"].forEach(secName => {
+
+        const items = sections[secName].items || {};
+
+        Object.values(items).forEach(item => {
+
+          if (isChecked) {
+            item.qty += 1;
+          } else {
+            item.qty = Math.max(0, item.qty - 1);
+          }
+
+        });
+
+      });
+    }
+
+    // 🔹 BREAKFAST
+    if (category === "breakfast") {
+
+      const items = sections.breakfast.items || {};
+
+      Object.values(items).forEach(item => {
+
+        const protein = (item.protein || "").toLowerCase();
+
+        if (
+          (type === "veg" && protein.includes("veg")) ||
+          (type === "egg" && protein.includes("egg"))
+        ) {
+          if (isChecked) {
+            item.qty += 1;
+          } else {
+            item.qty = Math.max(0, item.qty - 1);
+          }
+        }
+
+      });
+    }
+
+  }
+
+  // Re-render current day to reflect changes
+  renderCurrentDay();
 }
 
 </script>
