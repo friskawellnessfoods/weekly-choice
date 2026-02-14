@@ -110,27 +110,37 @@
   .section-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .section-header h4 {
   margin: 0;
-  min-width: 90px;
+  font-size: 16px;
+  white-space: nowrap;
 }
 
 .section-controls {
   display: flex;
-  gap: 10px;
-  flex: 1;
+  gap: 8px;
+  flex-wrap: wrap; /* prevents overflow on mobile */
 }
 
 .section-controls select {
   width: auto !important;
-  min-width: 140px;
+  min-width: 120px;
+  max-width: 160px;
 }
+@media (max-width: 480px) {
+  .section-header {
+    gap: 6px;
+  }
 
-
+  .section-controls select {
+    min-width: 110px;
+    max-width: 140px;
+  }
+}
 
  /* DISH */
   .dish {
