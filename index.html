@@ -304,10 +304,8 @@
   <button id="backBtn" class="btn secondary" onclick="prevDay()">Back</button>
   <button id="nextBtn" class="btn secondary" onclick="nextDay()">Next Day</button>
 </div>
-
-<button class="btn" onclick="submitData(event)">Submit</button>
-
-
+  
+<button class="btn" onclick="handleSubmit()">Submit</button>
 </div>
 
 <script>
@@ -638,12 +636,17 @@ function updateSectionLocation(date, section, value) {
 }
 
 
-function nextDay(){
+async function nextDay(){
+
+  const result = await saveCurrentDay();
+  if (!result.success) return;
+
   if (currentIndex < VISIBLE_DATES.length - 1) {
     currentIndex++;
     renderCurrentDay();
   }
 }
+
 function prevDay(){
   if (currentIndex > 0) {
     currentIndex--;
@@ -652,22 +655,21 @@ function prevDay(){
 }
 
 /* ========= SUBMIT ========= */
-async function submitData(e) {
+async function saveCurrentDay() {
+
   const phone = document.getElementById('phone').value.trim();
   if (!phone) return alert('Phone missing');
 
-  const btn = e.target;
-  btn.disabled = true;
-  btn.innerText = 'Submitting…';
+  const date = VISIBLE_DATES[currentIndex];
 
   const payload = {
     phone,
     remarks: clientRemarks.value || '',
-    days: VISIBLE_DATES.map(date => ({
+    days: [{
       date,
       sections: STATE[date].sections,
       cancel: STATE[date].cancel
-    }))
+    }]
   };
 
   const params = new URLSearchParams();
@@ -679,19 +681,17 @@ async function submitData(e) {
     body: params
   });
 
-
-  const result = await res.json();
-
-  btn.disabled = false;
-  btn.innerText = 'Submit';
+  return await res.json();
+} 
+async function handleSubmit() {
+  const result = await saveCurrentDay();
 
   if (result.success) {
-    alert('Submitted successfully');
+    alert("Saved successfully");
   } else {
-    alert('Submission failed');
+    alert("Save failed");
   }
-}
-  
+}  
 </script>
   </div>
 </body>
