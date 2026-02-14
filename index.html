@@ -110,35 +110,33 @@
   .section-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .section-header h4 {
   margin: 0;
   font-size: 16px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .section-controls {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap; /* prevents overflow on mobile */
+  gap: 6px;
 }
 
 .section-controls select {
-  width: auto !important;
-  min-width: 120px;
-  max-width: 160px;
+  width: 110px !important;
+  padding: 10px !important;
+  font-size: 14px !important;
 }
-@media (max-width: 480px) {
-  .section-header {
-    gap: 6px;
-  }
 
+@media (max-width: 480px) {
   .section-controls select {
-    min-width: 110px;
-    max-width: 140px;
+    width: 100px !important;
+    font-size: 13px !important;
   }
 }
 
