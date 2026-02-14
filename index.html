@@ -139,6 +139,42 @@
     font-size: 13px !important;
   }
 }
+  /* ===== PRESET COMPACT STYLE ===== */
+
+#presetBox {
+  padding: 8px 14px;          /* reduce box padding */
+  margin-bottom: 10px;
+}
+
+#presetBox details {
+  margin: 0;
+}
+
+#presetBox summary {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 4px 0;
+  list-style: none;
+  cursor: pointer;
+}
+
+#presetBox summary::-webkit-details-marker {
+  display: none;              /* remove default arrow */
+}
+
+#presetBox summary::after {
+  content: "▾";
+  float: right;
+  transition: 0.2s ease;
+}
+
+#presetBox details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.preset-grid {
+  padding-top: 8px;
+}
 
  /* DISH */
   .dish {
