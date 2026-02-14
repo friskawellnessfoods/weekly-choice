@@ -752,14 +752,6 @@ function renderBlock(date, slot, title) {
     headerHTML = `<h4>${title}</h4>`;
   }
 
-  if (!section.location) {
-    if (slot === 'option1' && CLIENT_LOCATION_1) {
-      section.location = CLIENT_LOCATION_1;
-    }
-    if (slot === 'option2' && CLIENT_LOCATION_2) {
-      section.location = CLIENT_LOCATION_2;
-    }
-  }
 
   return headerHTML +
     Object.keys(items).map(label => `
