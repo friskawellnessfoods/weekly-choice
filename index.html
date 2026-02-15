@@ -1039,8 +1039,9 @@ async function handleSubmit(event) {
     const date = VISIBLE_DATES[i];
 
     if (!hasSelectionForDate(date)) continue;
-
+    const submissionId = Date.now() + "_" + Math.random().toString(36).substring(2,8);
     const payload = {
+      submissionId,
       phone,
       remarks: clientRemarks.value || '',
       days: [{
