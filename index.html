@@ -1037,58 +1037,41 @@ async function handleSubmit(event) {
   const btn = event.target;
   btn.classList.add("loading");
 
-  const phone = document.getElementById('phone').value.trim();
-  if (!phone) {
-    btn.classList.remove("loading");
-    return alert('Phone missing');
-  }
+  // Save all days sequentially
+  for (let i = 0; i < VISIBLE_DATES.length; i++) {
 
-  // Collect all days that have selection
-  const daysToSave = VISIBLE_DATES
-    .filter(date => hasSelectionForDate(date))
-    .map(date => ({
-      date,
-      sections: STATE[date].sections,
-      cancel: STATE[date].cancel
-    }));
+    const date = VISIBLE_DATES[i];
 
-  if (!daysToSave.length) {
-    btn.classList.remove("loading");
-    return alert("No selections made.");
-  }
+    if (!hasSelectionForDate(date)) continue;
 
-  const payload = {
-    phone,
-    remarks: clientRemarks.value || '',
-    days: daysToSave
-  };
+    const payload = {
+      phone: document.getElementById('phone').value.trim(),
+      remarks: clientRemarks.value || '',
+      days: [{
+        date,
+        sections: STATE[date].sections,
+        cancel: STATE[date].cancel
+      }]
+    };
 
-  const params = new URLSearchParams();
-  params.append("action", "submitOrder");
-  params.append("payload", JSON.stringify(payload));
+    const params = new URLSearchParams();
+    params.append("action", "submitOrder");
+    params.append("payload", JSON.stringify(payload));
 
-  try {
-
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: params
-    });
-
-    const result = await res.json();
-
-    btn.classList.remove("loading");
-
-    if (result.success) {
-      generateSummary();
-    } else {
-      alert("Submit failed");
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        body: params
+      });
+    } catch (err) {
+      console.error("Save failed for date:", date);
     }
-
-  } catch (error) {
-    btn.classList.remove("loading");
-    alert("Network error");
   }
+
+  btn.classList.remove("loading");
+  generateSummary();
 }
+
 
 
 function getProteinClass(slot, item) {
