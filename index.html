@@ -496,7 +496,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxwE6gOimzOKA4c_fHdV0h7L_Wf6iroktLQ8MBB20XIkLK41zufmzrK78fJE8fVp2Jy/exec";  
+const API_URL = "https://script.google.com/macros/s/AKfycbxfmz_YdhhJO8oktIDghnHQm5n-X-x8fzfKenU6RXkAVRvXP3vRyYS29mSvKIRFYcjl/exec";  
 let CLIENT_LOCATION_1 = '';
 let CLIENT_LOCATION_2 = '';
 let CLIENT_DELIVERY = {};
@@ -918,7 +918,7 @@ function updateSectionSlot(date, section, value) {
 function updateSectionLocation(date, section, value) {
   STATE[date].sections[section].location = value;
 }
-function nextDay(event){
+function nextDay(){
 
   if (currentIndex < VISIBLE_DATES.length - 1) {
     currentIndex++;
@@ -930,6 +930,7 @@ function nextDay(event){
     }
   }
 }
+
 
 
 
@@ -1018,64 +1019,54 @@ async function saveCurrentDay(btn) {
     return { success: false };
   }
 }
-
 async function handleSubmit(event) {
 
-  const btn = event.currentTarget;
-
-  if (btn.disabled) return;
-
-  btn.disabled = true;
+  const btn = event.target;
   btn.classList.add("loading");
 
-  try {
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) {
+    btn.classList.remove("loading");
+    return alert("Phone missing");
+  }
 
-    const phone = document.getElementById('phone').value.trim();
+  // Save all days
+  for (let i = 0; i < VISIBLE_DATES.length; i++) {
+
+    const date = VISIBLE_DATES[i];
+
+    if (!hasSelectionForDate(date)) continue;
 
     const payload = {
       phone,
       remarks: clientRemarks.value || '',
-      days: VISIBLE_DATES.map(date => ({
+      days: [{
         date,
         sections: STATE[date].sections,
         cancel: STATE[date].cancel
-      }))
+      }]
     };
 
     const params = new URLSearchParams();
     params.append("action", "submitOrder");
     params.append("payload", JSON.stringify(payload));
 
-    const response = await fetch(API_URL, {
-      method: "POST",
-      body: params
-    });
-
-    if (!response.ok) {
-      throw new Error("Network response not OK");
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        body: params
+      });
+    } catch (err) {
+      console.error("Save failed for:", date);
     }
-
-    const result = await response.json();
-
-    if (!result.success) {
-      throw new Error("Backend returned failure");
-    }
-
-    generateSummary();
-
-  } catch (err) {
-
-    console.error("Submit error:", err);
-    alert("Submission failed. Please try again.");
-
   }
 
+  // 🔥 STOP LOADING IMMEDIATELY
   btn.classList.remove("loading");
-  btn.disabled = false;
+
+  // 🔥 SHOW SUMMARY
+  generateSummary();
 }
-
-
-
 
 
 
