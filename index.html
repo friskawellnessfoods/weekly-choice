@@ -1021,58 +1021,51 @@ async function saveCurrentDay(btn) {
 
 async function handleSubmit(event) {
 
-  const btn = event.target;
+  const btn = document.getElementById("submitBtn");
+
+  // 🔒 Prevent double submit
+  if (btn.disabled) return;
+
+  btn.disabled = true;
   btn.classList.add("loading");
 
-  const phone = document.getElementById('phone').value.trim();
-  if (!phone) {
-    btn.classList.remove("loading");
-    return alert("Phone missing");
-  }
-
-  const allDays = [];
-
-  VISIBLE_DATES.forEach(date => {
-
-    if (!hasSelectionForDate(date)) return;
-
-    allDays.push({
-      date,
-      sections: STATE[date].sections,
-      cancel: STATE[date].cancel
-    });
-
-  });
-
-  if (!allDays.length) {
-    btn.classList.remove("loading");
-    return alert("No selections made.");
-  }
-
-  const payload = {
-    phone,
-    remarks: clientRemarks.value || '',
-    days: allDays
-  };
-
-  const params = new URLSearchParams();
-  params.append("action", "submitOrder");
-  params.append("payload", JSON.stringify(payload));
-
   try {
-    await fetch(API_URL, {
-      method: "POST",
-      body: params
-    });
 
-    btn.classList.remove("loading");
-    generateSummary();
+    for (let i = 0; i < VISIBLE_DATES.length; i++) {
+
+      const date = VISIBLE_DATES[i];
+
+      if (!hasSelectionForDate(date)) continue;
+
+      const payload = {
+        phone: document.getElementById('phone').value.trim(),
+        remarks: clientRemarks.value || '',
+        days: [{
+          date,
+          sections: STATE[date].sections,
+          cancel: STATE[date].cancel
+        }]
+      };
+
+      const params = new URLSearchParams();
+      params.append("action", "submitOrder");
+      params.append("payload", JSON.stringify(payload));
+
+      await fetch(API_URL, {
+        method: "POST",
+        body: params
+      });
+    }
 
   } catch (err) {
-    btn.classList.remove("loading");
-    alert("Network error. Please try again.");
+    console.error("Submit failed", err);
+    alert("Submission failed. Please try again.");
   }
+
+  btn.classList.remove("loading");
+  btn.disabled = false;
 }
+
 
 
 
