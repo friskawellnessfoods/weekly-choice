@@ -1030,40 +1030,50 @@ async function handleSubmit(event) {
 
   try {
 
-    for (let i = 0; i < VISIBLE_DATES.length; i++) {
+    const phone = document.getElementById('phone').value.trim();
 
-      const date = VISIBLE_DATES[i];
+    const payload = {
+      phone,
+      remarks: clientRemarks.value || '',
+      days: VISIBLE_DATES.map(date => ({
+        date,
+        sections: STATE[date].sections,
+        cancel: STATE[date].cancel
+      }))
+    };
 
-      if (!hasSelectionForDate(date)) continue;
+    const params = new URLSearchParams();
+    params.append("action", "submitOrder");
+    params.append("payload", JSON.stringify(payload));
 
-      const payload = {
-        phone: document.getElementById('phone').value.trim(),
-        remarks: clientRemarks.value || '',
-        days: [{
-          date,
-          sections: STATE[date].sections,
-          cancel: STATE[date].cancel
-        }]
-      };
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: params
+    });
 
-      const params = new URLSearchParams();
-      params.append("action", "submitOrder");
-      params.append("payload", JSON.stringify(payload));
-
-      await fetch(API_URL, {
-        method: "POST",
-        body: params
-      });
+    if (!response.ok) {
+      throw new Error("Network response not OK");
     }
 
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error("Backend returned failure");
+    }
+
+    generateSummary();
+
   } catch (err) {
-    console.error("Submit failed", err);
+
+    console.error("Submit error:", err);
     alert("Submission failed. Please try again.");
+
   }
 
   btn.classList.remove("loading");
   btn.disabled = false;
 }
+
 
 
 
