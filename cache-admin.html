@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Friska Cache Control</title>
+</head>
+<body style="font-family:sans-serif;padding:40px;background:#f4f6f8;">
+
+<h2>Friska Cache Control Panel</h2>
+
+<button onclick="refresh('refreshMenu')" 
+        style="padding:10px 20px;margin-bottom:20px;">
+  Refresh Menu Cache
+</button>
+
+<br>
+
+<button onclick="refresh('refreshClients')" 
+        style="padding:10px 20px;">
+  Refresh Client Cache
+</button>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbylT40lyyUtMqsTSdsdYXwDvvht71RVpetWA8hkPKoay4EINWJ0v-vgNmKemsOdBLMw/exec";
+
+function refresh(action){
+  fetch(API_URL,{
+    method:"POST",
+    body:new URLSearchParams({action})
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    alert(data.message || "Done");
+  })
+  .catch(err=>{
+    alert("Error occurred");
+  });
+}
+</script>
+
+</body>
+</html>
