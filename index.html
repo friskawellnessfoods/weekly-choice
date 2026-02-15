@@ -678,27 +678,16 @@ function renderCurrentDay(){
   }
 
   const parsedDate = new Date(date);
-
   // 🔵 Fix slot for single-delivery clients
   if (!hasAfternoonEveningSlots()) {
-
     const singleSlot =
       CLIENT_DELIVERY?.morning ? 'Morning' :
       CLIENT_DELIVERY?.afternoon ? 'Afternoon' :
       CLIENT_DELIVERY?.evening ? 'Evening' :
       'Afternoon';
-
+  
     STATE[date].sections.option1.slot = singleSlot;
     STATE[date].sections.option2.slot = singleSlot;
-
-    const defaultLocation =
-      CLIENT_LOCATION_1 || CLIENT_LOCATION_2 || '';
-
-    STATE[date].sections.option1.location =
-      STATE[date].sections.option1.location || defaultLocation;
-
-    STATE[date].sections.option2.location =
-      STATE[date].sections.option2.location || defaultLocation;
   }
 
   const dayName = parsedDate.toLocaleDateString('en-US', {
@@ -710,32 +699,32 @@ function renderCurrentDay(){
     parsedDate.toLocaleDateString('en-US', { month: 'short' }) + '-' +
     parsedDate.getFullYear();
 
+
   container.innerHTML = `
     <div class="box">
      
-      <div class="day-header">
-        <div class="day-text" style="position:relative;">
-          
-          <div class="day-name" onclick="toggleDayDropdown(event)">
-            <span class="day-arrow">▼</span> ${dayName}
-          </div>
-
-          <div id="dayDropdown" class="day-dropdown">
-            ${VISIBLE_DATES.map((d,i)=>{
-              const dn = new Date(d).toLocaleDateString('en-US',{weekday:'long'});
-              return `<div onclick="jumpToDay(${i})">${dn}</div>`;
-            }).join('')}
-          </div>
-
-          <div class="day-date">${formattedDate}</div>
+    <div class="day-header">
+      <div class="day-text" style="position:relative;">
+        <div class="day-name" onclick="toggleDayDropdown(event)">
+          <span class="day-arrow">▼</span> ${dayName}
         </div>
-      
-        <label class="cancel-wrap">
-          <input type="checkbox"
-            onchange="STATE['${date}'].cancel=this.checked">
-          Cancel This Day
-        </label>
+
+        <div id="dayDropdown" class="day-dropdown">
+          ${VISIBLE_DATES.map((d,i)=>{
+            const dn = new Date(d).toLocaleDateString('en-US',{weekday:'long'});
+            return `<div onclick="jumpToDay(${i})">${dn}</div>`;
+          }).join('')}
+        </div>
+
+        <div class="day-date">${formattedDate}</div>
       </div>
+    
+      <label class="cancel-wrap">
+        <input type="checkbox"
+          onchange="STATE['${date}'].cancel=this.checked">
+        Cancel This Day
+      </label>
+    </div>
 
       ${renderBlock(date,'breakfast','Breakfast')}
       ${renderBlock(date,'option1','Option 1')}
@@ -744,24 +733,20 @@ function renderCurrentDay(){
       ${renderBlock(date,'juice1','Juice 1')}
       ${renderBlock(date,'juice2','Juice 2')}
       
-      ${!hasAfternoonEveningSlots() ? `
+     ${!hasAfternoonEveningSlots() ? `
         <label>Location</label>
         <select id="loc_${date}"
-          onchange="
-            STATE['${date}'].sections.option1.location=this.value;
-            STATE['${date}'].sections.option2.location=this.value;
-          ">
+          onchange="STATE['${date}'].sections.option1.location=this.value">
       
           ${CLIENT_LOCATION_1 ? `
             <option value="${CLIENT_LOCATION_1}"
-              ${STATE[date].sections.option1.location === CLIENT_LOCATION_1 ? 'selected' : ''}>
+              ${!CLIENT_LOCATION_2 ? 'selected' : ''}>
               ${CLIENT_LOCATION_1}
             </option>
           ` : ''}
       
           ${CLIENT_LOCATION_2 ? `
-            <option value="${CLIENT_LOCATION_2}"
-              ${STATE[date].sections.option1.location === CLIENT_LOCATION_2 ? 'selected' : ''}>
+            <option value="${CLIENT_LOCATION_2}">
               ${CLIENT_LOCATION_2}
             </option>
           ` : ''}
@@ -776,6 +761,42 @@ function renderCurrentDay(){
   nextBtn.style.display = currentIndex < VISIBLE_DATES.length - 1 ? 'block' : 'none';
 }
 
+
+function renderBlock(date, slot, title) {
+
+  const section = STATE[date].sections[slot];
+  const items = section?.items;
+  if (!items || !Object.keys(items).length) return '';
+
+  const showSlotControls =
+    hasAfternoonEveningSlots() && (slot !== 'breakfast');
+
+  const showLocationControl =
+    hasAfternoonEveningSlots() &&
+    (slot === 'option1' || slot === 'option2');
+
+  // ✅ Set default location safely BEFORE rendering
+  if (hasAfternoonEveningSlots() && !section.location) {
+    if (slot === 'option1' && CLIENT_LOCATION_1) {
+      section.location = CLIENT_LOCATION_1;
+    }
+    if (slot === 'option2' && CLIENT_LOCATION_2) {
+      section.location = CLIENT_LOCATION_2;
+    }
+  }
+
+  let headerHTML = '';
+
+  if (showSlotControls) {
+
+    let locOptions = '';
+
+    if (CLIENT_LOCATION_1) {
+      locOptions += `<option value="${CLIENT_LOCATION_1.replace(/"/g,'&quot;')}"
+        ${section.location === CLIENT_LOCATION_1 ? 'selected' : ''}>
+        ${CLIENT_LOCATION_1}
+      </option>`;
+    }
 
     if (CLIENT_LOCATION_2) {
       locOptions += `<option value="${CLIENT_LOCATION_2.replace(/"/g,'&quot;')}"
