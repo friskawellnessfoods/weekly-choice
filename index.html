@@ -678,6 +678,7 @@ function renderCurrentDay(){
   }
 
   const parsedDate = new Date(date);
+  ${!hasAfternoonEveningSlots() ? `
   // 🔵 Fix slot for single-delivery clients
   if (!hasAfternoonEveningSlots()) {
     const singleSlot =
