@@ -678,17 +678,32 @@ function renderCurrentDay(){
   }
 
   const parsedDate = new Date(date);
-  // 🔵 Fix slot for single-delivery clients
+  // 🔵 Fix slot + location for single-delivery clients
   if (!hasAfternoonEveningSlots()) {
+  
     const singleSlot =
       CLIENT_DELIVERY?.morning ? 'Morning' :
       CLIENT_DELIVERY?.afternoon ? 'Afternoon' :
       CLIENT_DELIVERY?.evening ? 'Evening' :
       'Afternoon';
   
+    const defaultLocation =
+      CLIENT_LOCATION_1 || CLIENT_LOCATION_2 || '';
+  
+    // Fix slot
     STATE[date].sections.option1.slot = singleSlot;
     STATE[date].sections.option2.slot = singleSlot;
+  
+    // Fix location (only if not already set)
+    if (!STATE[date].sections.option1.location) {
+      STATE[date].sections.option1.location = defaultLocation;
+    }
+  
+    if (!STATE[date].sections.option2.location) {
+      STATE[date].sections.option2.location = defaultLocation;
+    }
   }
+
 
   const dayName = parsedDate.toLocaleDateString('en-US', {
     weekday: 'long'
