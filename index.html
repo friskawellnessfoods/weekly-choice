@@ -1069,6 +1069,7 @@ async function handleSubmit(event) {
 
   // 🔥 SHOW SUMMARY
   generateSummary();
+  resetAllSelections();
 }
 
 
@@ -1330,6 +1331,27 @@ document.addEventListener("click", function(){
   const dd = document.getElementById("dayDropdown");
   if (dd) dd.style.display = "none";
 });
+function resetAllSelections() {
+
+  Object.keys(STATE).forEach(date => {
+
+    const day = STATE[date];
+    if (!day) return;
+
+    day.cancel = false;
+
+    Object.values(day.sections).forEach(sec => {
+
+      Object.values(sec.items || {}).forEach(item => {
+        item.qty = 0;
+      });
+
+    });
+
+  });
+
+  renderCurrentDay();
+}
 
 </script>
   </div>
