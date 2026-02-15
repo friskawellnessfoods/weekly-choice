@@ -428,22 +428,22 @@
 
     <div class="preset-grid">
 
-      <!-- MEALS -->
+      
       <label><input type="checkbox" onchange="togglePreset('meals','chicken',this)"> Both Chicken Meals Everyday</label>
       <label><input type="checkbox" onchange="togglePreset('meals','veg',this)"> Both Veg Meals Everyday</label>
-
-      <label><input type="checkbox" onchange="togglePreset('meals','seafood',this)"> Both Seafood Meals Everyday</label>
-      <label><input type="checkbox" onchange="togglePreset('meals','egg',this)"> One Egg Meal Everyday</label>
-
-      <!-- BREAKFAST -->
       <label><input type="checkbox" onchange="togglePreset('breakfast','veg',this)"> Veg Breakfast Everyday</label>
       <label><input type="checkbox" onchange="togglePreset('breakfast','breakfast',this)"> Breakfast Everyday (Egg)</label>
+      <label><input type="checkbox" onchange="togglePreset('meals','seafood',this)"> Both Seafood Meals Everyday</label>
+      <label><input type="checkbox" onchange="togglePreset('meals','egg',this)"> One Egg Meal Everyday</label>
+      <label><input type="checkbox" onchange="togglePreset('meals','fish',this)"> One Fish Meal Everyday</label>
+      <label><input type="checkbox" onchange="togglePreset('meals','prawns',this)"> One Prawns Meal Everyday</label>
+      
 
-      <!-- SNACK -->
+      
       <label><input type="checkbox" onchange="togglePreset('snack','all',this)"> Snack Everyday</label>
       <label><input type="checkbox" onchange="togglePreset('snack','veg',this)"> Veg Snack Everyday</label>
 
-      <!-- JUICE -->
+     
       <label><input type="checkbox" onchange="togglePreset('juice','both',this)"> Both Juices Everyday</label>
 
     </div>
@@ -1110,19 +1110,45 @@ function togglePreset(type, protein, checkbox) {
     ======================== */
     if (type === 'meals') {
 
-      ['option1', 'option2'].forEach(slot => {
+  ['option1', 'option2'].forEach(slot => {
 
-        Object.values(sections[slot].items).forEach(item => {
+    Object.entries(sections[slot].items).forEach(([label, item]) => {
 
-          if (item.protein && item.protein.toLowerCase() === protein.toLowerCase()) {
-            item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
-          }
+      const proteinType = (item.protein || '').toLowerCase();
+      const labelLower = label.toLowerCase();
 
-        });
+      // Regular protein presets (chicken / veg / seafood / egg)
+      if (
+        ['chicken','veg','seafood','egg'].includes(protein) &&
+        proteinType === protein.toLowerCase()
+      ) {
+        item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
+      }
 
-      });
+      // Fish preset
+      if (
+        protein === 'fish' &&
+        proteinType === 'seafood' &&
+        labelLower.includes('fish')
+      ) {
+        item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
+      }
 
-    }
+      // Prawns preset
+      if (
+        protein === 'prawns' &&
+        proteinType === 'seafood' &&
+        labelLower.includes('prawn')
+      ) {
+        item.qty = Math.max(0, item.qty + (isChecked ? 1 : -1));
+      }
+
+    });
+
+  });
+
+}
+
 
     /* =======================
        BREAKFAST
