@@ -856,16 +856,18 @@ function updateSectionSlot(date, section, value) {
 function updateSectionLocation(date, section, value) {
   STATE[date].sections[section].location = value;
 }
-async function nextDay(event){
+function nextDay(event){
 
   const btn = event.target;
-  const result = await saveCurrentDay(btn);
 
-  if (!result.success) {
-    alert("Save failed");
-    return;
-  }
+  // Save in background (no await)
+  saveCurrentDay(btn).then(result => {
+    if (!result.success) {
+      alert("Previous day save failed. Please recheck.");
+    }
+  });
 
+  // Immediately move to next day
   if (currentIndex < VISIBLE_DATES.length - 1) {
     currentIndex++;
     renderCurrentDay();
@@ -876,6 +878,7 @@ async function nextDay(event){
     }
   }
 }
+
 
 function prevDay(){
 
