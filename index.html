@@ -492,7 +492,7 @@
   <button id="nextBtn" class="btn secondary" onclick="nextDay(event)">Next Day</button>
 </div>
   
-<button class="btn" onclick="handleSubmit(event)">Submit</button>
+<button class="btn" onclick="handleSubmit(event)">Submit & Exit</button>
 </div>
 
 <script>
@@ -920,16 +920,6 @@ function updateSectionLocation(date, section, value) {
 }
 function nextDay(event){
 
-  const btn = event.target;
-
-  // Save in background (no await)
-  saveCurrentDay(btn).then(result => {
-    if (!result.success) {
-      alert("Previous day save failed. Please recheck.");
-    }
-  });
-
-  // Immediately move to next day
   if (currentIndex < VISIBLE_DATES.length - 1) {
     currentIndex++;
     renderCurrentDay();
@@ -940,6 +930,7 @@ function nextDay(event){
     }
   }
 }
+
 
 
 function prevDay(){
@@ -1033,39 +1024,54 @@ async function handleSubmit(event) {
   const btn = event.target;
   btn.classList.add("loading");
 
-  // Save all days sequentially
-  for (let i = 0; i < VISIBLE_DATES.length; i++) {
-
-    const date = VISIBLE_DATES[i];
-
-    if (!hasSelectionForDate(date)) continue;
-
-    const payload = {
-      phone: document.getElementById('phone').value.trim(),
-      remarks: clientRemarks.value || '',
-      days: [{
-        date,
-        sections: STATE[date].sections,
-        cancel: STATE[date].cancel
-      }]
-    };
-
-    const params = new URLSearchParams();
-    params.append("action", "submitOrder");
-    params.append("payload", JSON.stringify(payload));
-
-    try {
-      await fetch(API_URL, {
-        method: "POST",
-        body: params
-      });
-    } catch (err) {
-      console.error("Save failed for date:", date);
-    }
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) {
+    btn.classList.remove("loading");
+    return alert("Phone missing");
   }
 
-  btn.classList.remove("loading");
-  generateSummary();
+  const allDays = [];
+
+  VISIBLE_DATES.forEach(date => {
+
+    if (!hasSelectionForDate(date)) return;
+
+    allDays.push({
+      date,
+      sections: STATE[date].sections,
+      cancel: STATE[date].cancel
+    });
+
+  });
+
+  if (!allDays.length) {
+    btn.classList.remove("loading");
+    return alert("No selections made.");
+  }
+
+  const payload = {
+    phone,
+    remarks: clientRemarks.value || '',
+    days: allDays
+  };
+
+  const params = new URLSearchParams();
+  params.append("action", "submitOrder");
+  params.append("payload", JSON.stringify(payload));
+
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      body: params
+    });
+
+    btn.classList.remove("loading");
+    generateSummary();
+
+  } catch (err) {
+    btn.classList.remove("loading");
+    alert("Network error. Please try again.");
+  }
 }
 
 
