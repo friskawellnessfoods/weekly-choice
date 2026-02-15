@@ -1148,7 +1148,7 @@ function generateSummary() {
     Object.values(grouped).forEach(group => {
 
       const showSlot = hasAfternoonEveningSlots();
-      const showLocation = !!CLIENT_LOCATION_2;
+      const showLocation = !hasAfternoonEveningSlots();
 
       if (showSlot || showLocation) {
 
