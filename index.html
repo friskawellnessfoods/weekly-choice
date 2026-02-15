@@ -624,6 +624,25 @@ function initState(){
       cancel: false
     };
 
+    // 🔵 FIX: Apply single-slot slot + location correction immediately
+    if (!hasAfternoonEveningSlots()) {
+
+      const singleSlot =
+        CLIENT_DELIVERY?.morning ? 'Morning' :
+        CLIENT_DELIVERY?.afternoon ? 'Afternoon' :
+        CLIENT_DELIVERY?.evening ? 'Evening' :
+        'Afternoon';
+
+      const defaultLocation =
+        CLIENT_LOCATION_1 || CLIENT_LOCATION_2 || '';
+
+      STATE[date].sections.option1.slot = singleSlot;
+      STATE[date].sections.option2.slot = singleSlot;
+
+      STATE[date].sections.option1.location = defaultLocation;
+      STATE[date].sections.option2.location = defaultLocation;
+    }
+
     // Populate items
     ['option1','option2','breakfast'].forEach(sec => {
       if (!MENU[date][sec]) return;
@@ -642,21 +661,21 @@ function initState(){
           qty: 0,
           type: item.type,
           label: item.label
-      };
-    });
-  }
+        };
+      });
+    }
 
     if (MENU[date].juice1) {
       MENU[date].juice1.forEach(j => {
         STATE[date].sections.juice1.items[j] = { qty: 0 };
       });
-  }
+    }
 
     if (MENU[date].juice2) {
       MENU[date].juice2.forEach(j => {
         STATE[date].sections.juice2.items[j] = { qty: 0 };
-    });
-  }
+      });
+    }
     
   });
 }
@@ -664,6 +683,7 @@ function initState(){
 function hasAfternoonEveningSlots() {
   return CLIENT_DELIVERY?.afternoon && CLIENT_DELIVERY?.evening;
 }
+
 
 
 
@@ -678,31 +698,7 @@ function renderCurrentDay(){
   }
 
   const parsedDate = new Date(date);
-  // 🔵 Fix slot + location for single-delivery clients
-  if (!hasAfternoonEveningSlots()) {
   
-    const singleSlot =
-      CLIENT_DELIVERY?.morning ? 'Morning' :
-      CLIENT_DELIVERY?.afternoon ? 'Afternoon' :
-      CLIENT_DELIVERY?.evening ? 'Evening' :
-      'Afternoon';
-  
-    const defaultLocation =
-      CLIENT_LOCATION_1 || CLIENT_LOCATION_2 || '';
-  
-    // Fix slot
-    STATE[date].sections.option1.slot = singleSlot;
-    STATE[date].sections.option2.slot = singleSlot;
-  
-    // Fix location (only if not already set)
-    if (!STATE[date].sections.option1.location) {
-      STATE[date].sections.option1.location = defaultLocation;
-    }
-  
-    if (!STATE[date].sections.option2.location) {
-      STATE[date].sections.option2.location = defaultLocation;
-    }
-  }
 
 
   const dayName = parsedDate.toLocaleDateString('en-US', {
