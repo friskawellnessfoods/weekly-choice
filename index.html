@@ -678,6 +678,17 @@ function renderCurrentDay(){
   }
 
   const parsedDate = new Date(date);
+  // 🔵 Fix slot for single-delivery clients
+  if (!hasAfternoonEveningSlots()) {
+    const singleSlot =
+      CLIENT_DELIVERY?.morning ? 'Morning' :
+      CLIENT_DELIVERY?.afternoon ? 'Afternoon' :
+      CLIENT_DELIVERY?.evening ? 'Evening' :
+      'Afternoon';
+  
+    STATE[date].sections.option1.slot = singleSlot;
+    STATE[date].sections.option2.slot = singleSlot;
+  }
 
   const dayName = parsedDate.toLocaleDateString('en-US', {
     weekday: 'long'
