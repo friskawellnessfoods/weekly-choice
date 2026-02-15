@@ -1021,9 +1021,8 @@ async function saveCurrentDay(btn) {
 
 async function handleSubmit(event) {
 
-  const btn = document.getElementById("submitBtn");
+  const btn = event.currentTarget;
 
-  // 🔒 Prevent double submit
   if (btn.disabled) return;
 
   btn.disabled = true;
@@ -1065,6 +1064,7 @@ async function handleSubmit(event) {
   btn.classList.remove("loading");
   btn.disabled = false;
 }
+
 
 
 
