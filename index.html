@@ -496,7 +496,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxfmz_YdhhJO8oktIDghnHQm5n-X-x8fzfKenU6RXkAVRvXP3vRyYS29mSvKIRFYcjl/exec";  
+const API_URL = "https://script.google.com/macros/s/AKfycbwvRBX2RlMAz1U1R0m_T9CRhhIfHAdX_EEJwODwbfTeIedzRwDAcTJsAa6ZK9kDrI5U/exec";  
 let CLIENT_LOCATION_1 = '';
 let CLIENT_LOCATION_2 = '';
 let CLIENT_DELIVERY = {};
@@ -747,7 +747,10 @@ function renderCurrentDay(){
      ${!hasAfternoonEveningSlots() ? `
         <label>Location</label>
         <select id="loc_${date}"
-          onchange="STATE['${date}'].sections.option1.location=this.value">
+          onchange="
+            STATE['${date}'].sections.option1.location=this.value;
+            STATE['${date}'].sections.option2.location=this.value;
+          ">
       
           ${CLIENT_LOCATION_1 ? `
             <option value="${CLIENT_LOCATION_1}"
