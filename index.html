@@ -1035,15 +1035,61 @@ async function saveCurrentDay(btn) {
 async function handleSubmit(event) {
 
   const btn = event.target;
+  btn.classList.add("loading");
 
-  const result = await saveCurrentDay(btn);
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) {
+    btn.classList.remove("loading");
+    return alert('Phone missing');
+  }
 
-  if (result.success) {
-    generateSummary();
-  } else {
-    alert("Save failed");
+  // Collect all days that have selection
+  const daysToSave = VISIBLE_DATES
+    .filter(date => hasSelectionForDate(date))
+    .map(date => ({
+      date,
+      sections: STATE[date].sections,
+      cancel: STATE[date].cancel
+    }));
+
+  if (!daysToSave.length) {
+    btn.classList.remove("loading");
+    return alert("No selections made.");
+  }
+
+  const payload = {
+    phone,
+    remarks: clientRemarks.value || '',
+    days: daysToSave
+  };
+
+  const params = new URLSearchParams();
+  params.append("action", "submitOrder");
+  params.append("payload", JSON.stringify(payload));
+
+  try {
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: params
+    });
+
+    const result = await res.json();
+
+    btn.classList.remove("loading");
+
+    if (result.success) {
+      generateSummary();
+    } else {
+      alert("Submit failed");
+    }
+
+  } catch (error) {
+    btn.classList.remove("loading");
+    alert("Network error");
   }
 }
+
 
 function getProteinClass(slot, item) {
 
