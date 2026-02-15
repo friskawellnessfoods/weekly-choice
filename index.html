@@ -279,8 +279,38 @@
   .day-name {
     font-size: 20px;
     font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
 
+  .day-arrow {
+    font-size: 12px;
+    color: #777;
+  }
+  .day-dropdown {
+    display: none;
+    position: absolute;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    margin-top: 6px;
+    z-index: 10;
+    min-width: 160px;
+    padding: 6px 0;
+  }
+
+  .day-dropdown div {
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .day-dropdown div:hover {
+    background: #f2f2f2;
+  }
   .day-date {
     font-size: 14px;
     color: #666;
@@ -649,22 +679,32 @@ function renderCurrentDay(){
 
   const parsedDate = new Date(date);
 
-const dayName = parsedDate.toLocaleDateString('en-US', {
-  weekday: 'long'
-});
+  const dayName = parsedDate.toLocaleDateString('en-US', {
+    weekday: 'long'
+  });
 
-const formattedDate =
-  String(parsedDate.getDate()).padStart(2, '0') + '-' +
-  parsedDate.toLocaleDateString('en-US', { month: 'short' }) + '-' +
-  parsedDate.getFullYear();
+  const formattedDate =
+    String(parsedDate.getDate()).padStart(2, '0') + '-' +
+    parsedDate.toLocaleDateString('en-US', { month: 'short' }) + '-' +
+    parsedDate.getFullYear();
 
 
   container.innerHTML = `
     <div class="box">
      
     <div class="day-header">
-      <div class="day-text">
-        <div class="day-name">${dayName}</div>
+      <div class="day-text" style="position:relative;">
+        <div class="day-name" onclick="toggleDayDropdown(event)">
+          <span class="day-arrow">▼</span> ${dayName}
+        </div>
+
+        <div id="dayDropdown" class="day-dropdown">
+          ${VISIBLE_DATES.map((d,i)=>{
+            const dn = new Date(d).toLocaleDateString('en-US',{weekday:'long'});
+            return `<div onclick="jumpToDay(${i})">${dn}</div>`;
+          }).join('')}
+        </div>
+
         <div class="day-date">${formattedDate}</div>
       </div>
     
@@ -708,8 +748,8 @@ const formattedDate =
 
   backBtn.style.display = currentIndex > 0 ? 'block' : 'none';
   nextBtn.style.display = currentIndex < VISIBLE_DATES.length - 1 ? 'block' : 'none';
-
 }
+
 
 function renderBlock(date, slot, title) {
 
@@ -1221,6 +1261,21 @@ function togglePreset(type, protein, checkbox) {
 
   renderCurrentDay();
 }
+function toggleDayDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById("dayDropdown");
+  dd.style.display = dd.style.display === "block" ? "none" : "block";
+}
+
+function jumpToDay(index) {
+  currentIndex = index;
+  renderCurrentDay();
+}
+
+document.addEventListener("click", function(){
+  const dd = document.getElementById("dayDropdown");
+  if (dd) dd.style.display = "none";
+});
 
 </script>
   </div>
