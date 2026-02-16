@@ -93,13 +93,13 @@ button {
 
     <select id="type">
       <option value="">Select Meal Type</option>
+      <option value="1 Morning deliver">1 Morning deliver</option>
       <option value="2 Nutri Balance">2 Nutri Balance</option>
       <option value="3 High Protein">3 High Protein</option>
       <option value="4 High Carb">4 High Carb</option>
       <option value="5 Low Carb">5 Low Carb</option>
       <option value="6 No Carb">6 No Carb</option>
       <option value="7 High Fiber">7 High Fiber</option>
-      <option value="1 Morning deliver">1 Morning deliver</option>
       <option value="8 Multi-Category">8 Multi-Category</option>
       <option value="9 Evening Delivery">9 Evening Delivery</option>
     </select>
@@ -115,7 +115,10 @@ button {
       <label><input type="checkbox" id="evening"> Evening</label>
     </div>
 
-    <button class="primary" onclick="addClient()">Save Client</button>
+    <button id="saveBtn" class="primary">
+      Save Client
+    </button>
+
     <button class="secondary" onclick="refreshClients()">Refresh Cache</button>
 
     <div id="message" class="message"></div>
@@ -124,7 +127,14 @@ button {
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbx38bZOBKCD4j8cb9msZPThxkJzJwkRWM8bQZHIey05da8pSz99zCuiZYmb7JL0LVwx/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxqJwV7OIaibHSLBl7Q8r52qo55i_6B4VksyQIZIw1DjdswvQHBta7PHUNdRquc7yWi/exec";
+
+let isSubmitting = false;
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("saveBtn")
+    .addEventListener("click", addClient);
+});
 
 function showMessage(text, error=false){
   const msg = document.getElementById("message");
@@ -133,6 +143,17 @@ function showMessage(text, error=false){
 }
 
 async function addClient(){
+
+  if (isSubmitting) return;
+
+  const saveBtn = document.getElementById("saveBtn");
+  const container = document.querySelector(".container");
+
+  // 🔥 SHOW LOADING IMMEDIATELY
+  isSubmitting = true;
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = `<span class="spinner"></span> Saving...`;
+  container.classList.add("loading");
 
   const data = {
     name: document.getElementById("name").value.trim(),
@@ -148,6 +169,7 @@ async function addClient(){
   };
 
   if(!data.name || !data.phone){
+    resetButton();
     showMessage("Name & Phone required", true);
     return;
   }
@@ -175,27 +197,18 @@ async function addClient(){
   } catch(err){
     showMessage("Server Error", true);
   }
+
+  resetButton();
 }
 
-async function refreshClients(){
-  try{
-    const res = await fetch(API_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/x-www-form-urlencoded"},
-      body:new URLSearchParams({ action:"refreshClients" })
-    });
+function resetButton(){
+  const saveBtn = document.getElementById("saveBtn");
+  const container = document.querySelector(".container");
 
-    const result = await res.json();
-
-    if(result.success){
-      showMessage("Cache Refreshed 🔄");
-    } else {
-      showMessage("Error refreshing", true);
-    }
-
-  } catch(err){
-    showMessage("Server Error", true);
-  }
+  isSubmitting = false;
+  saveBtn.disabled = false;
+  saveBtn.innerHTML = "Save Client";
+  container.classList.remove("loading");
 }
 
 function clearForm(){
@@ -206,6 +219,7 @@ function clearForm(){
   document.getElementById("type").value="";
 }
 </script>
+
 
 
 </body>
