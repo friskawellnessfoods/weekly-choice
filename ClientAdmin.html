@@ -135,16 +135,16 @@ function showMessage(text, error=false){
 async function addClient(){
 
   const data = {
-    name: name.value.trim(),
-    phone: phone.value.trim(),
-    type: type.value,
-    remarks: remarks.value.trim(),
-    location1: location1.value.trim(),
-    location2: location2.value.trim(),
-    deliveryPrice: deliveryPrice.value.trim(),
-    morning: morning.checked,
-    afternoon: afternoon.checked,
-    evening: evening.checked
+    name: document.getElementById("name").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    type: document.getElementById("type").value,
+    remarks: document.getElementById("remarks").value.trim(),
+    location1: document.getElementById("location1").value.trim(),
+    location2: document.getElementById("location2").value.trim(),
+    deliveryPrice: document.getElementById("deliveryPrice").value.trim(),
+    morning: document.getElementById("morning").checked,
+    afternoon: document.getElementById("afternoon").checked,
+    evening: document.getElementById("evening").checked
   };
 
   if(!data.name || !data.phone){
@@ -152,44 +152,61 @@ async function addClient(){
     return;
   }
 
-  const res = await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:new URLSearchParams({
-      action:"addClient",
-      payload:JSON.stringify(data)
-    })
-  });
+  try {
 
-  const result = await res.json();
-
-  if(result.success){
-    showMessage("Client Added ✅");
-    document.querySelectorAll("input").forEach(i=>{
-      if(i.type==="checkbox") i.checked=false;
-      else i.value="";
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/x-www-form-urlencoded"},
+      body:new URLSearchParams({
+        action:"addClient",
+        payload:JSON.stringify(data)
+      })
     });
-    type.value="";
-  } else {
-    showMessage(result.message || "Error", true);
+
+    const result = await res.json();
+
+    if(result.success){
+      showMessage("Client Added ✅");
+      clearForm();
+    } else {
+      showMessage(result.message || "Error", true);
+    }
+
+  } catch(err){
+    showMessage("Server Error", true);
   }
 }
 
 async function refreshClients(){
-  const res = await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:new URLSearchParams({ action:"refreshClients" })
-  });
+  try{
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/x-www-form-urlencoded"},
+      body:new URLSearchParams({ action:"refreshClients" })
+    });
 
-  const result = await res.json();
-  if(result.success){
-    showMessage("Cache Refreshed 🔄");
-  } else {
-    showMessage("Error refreshing", true);
+    const result = await res.json();
+
+    if(result.success){
+      showMessage("Cache Refreshed 🔄");
+    } else {
+      showMessage("Error refreshing", true);
+    }
+
+  } catch(err){
+    showMessage("Server Error", true);
   }
 }
+
+function clearForm(){
+  document.querySelectorAll("input").forEach(i=>{
+    if(i.type==="checkbox") i.checked=false;
+    else i.value="";
+  });
+  document.getElementById("type").value="";
+}
 </script>
+
 
 </body>
 </html>
