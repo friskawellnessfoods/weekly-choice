@@ -680,9 +680,14 @@ function initState(){
   });
 }
 
-function hasAfternoonEveningSlots() {
-  return CLIENT_DELIVERY?.afternoon && CLIENT_DELIVERY?.evening;
+function hasAfternoonEveningOnly() {
+  return (
+    !CLIENT_DELIVERY?.morning &&
+    CLIENT_DELIVERY?.afternoon &&
+    CLIENT_DELIVERY?.evening
+  );
 }
+
 
 
 
@@ -783,7 +788,7 @@ function renderBlock(date, slot, title) {
   if (!items || !Object.keys(items).length) return '';
 
   const showSlotControls =
-    hasAfternoonEveningSlots();
+    hasAfternoonEveningOnly();
 
   const showLocationControl =
     hasAfternoonEveningSlots() &&
