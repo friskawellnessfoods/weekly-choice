@@ -1030,55 +1030,74 @@ async function saveCurrentDay(btn) {
     return { success: false };
   }
 }
-async function handleSubmit(event) {
+
+  async function handleSubmit(event) {
 
   const btn = event.target;
+
+  // 🔒 Prevent double click
+  if (btn.dataset.locked === "true") return;
+
+  btn.dataset.locked = "true";
+  btn.disabled = true;
   btn.classList.add("loading");
 
   const phone = document.getElementById('phone').value.trim();
   if (!phone) {
+    btn.disabled = false;
+    btn.dataset.locked = "false";
     btn.classList.remove("loading");
     return alert("Phone missing");
   }
 
-  // Save all days
-  for (let i = 0; i < VISIBLE_DATES.length; i++) {
+  const allDays = [];
 
-    const date = VISIBLE_DATES[i];
+  VISIBLE_DATES.forEach(date => {
+    if (!hasSelectionForDate(date)) return;
 
-    if (!hasSelectionForDate(date)) continue;
-    const submissionId = Date.now() + "_" + Math.random().toString(36).substring(2,8);
-    const payload = {
-      submissionId,
-      phone,
-      remarks: clientRemarks.value || '',
-      days: [{
-        date,
-        sections: STATE[date].sections,
-        cancel: STATE[date].cancel
-      }]
-    };
+    allDays.push({
+      date,
+      sections: STATE[date].sections,
+      cancel: STATE[date].cancel
+    });
+  });
 
-    const params = new URLSearchParams();
-    params.append("action", "submitOrder");
-    params.append("payload", JSON.stringify(payload));
-
-    try {
-      await fetch(API_URL, {
-        method: "POST",
-        body: params
-      });
-    } catch (err) {
-      console.error("Save failed for:", date);
-    }
+  if (!allDays.length) {
+    btn.disabled = false;
+    btn.dataset.locked = "false";
+    btn.classList.remove("loading");
+    return alert("No selections made.");
   }
 
-  // 🔥 STOP LOADING IMMEDIATELY
+  const payload = {
+    phone,
+    remarks: clientRemarks.value || '',
+    days: allDays
+  };
+
+  const params = new URLSearchParams();
+  params.append("action", "submitOrder");
+  params.append("payload", JSON.stringify(payload));
+
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      body: params
+    });
+
+    generateSummary();
+
+  } catch (err) {
+    alert("Network error. Please try again.");
+  }
+
   btn.classList.remove("loading");
 
-  // 🔥 SHOW SUMMARY
-  generateSummary();
-  resetAllSelections();
+  // ⏳ Keep disabled for 60 seconds
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.dataset.locked = "false";
+  }, 60000);
 }
 
 
@@ -1361,14 +1380,43 @@ function resetAllSelections() {
 
   renderCurrentDay();
 }
+function shareSummary() {
+
+  const summaryDiv = document.getElementById("summaryContent");
+
+  let text = summaryDiv.innerText;
+
+  const clientName = document.getElementById("clientName").value;
+  const phone = document.getElementById("phone").value;
+
+  const header =
+`Friska Wellness - Weekly Meal Confirmation
+Client: ${clientName}
+Phone: ${phone}
+
+`;
+
+  const finalText = header + text;
+
+  const encoded = encodeURIComponent(finalText);
+
+  const whatsappURL = `https://wa.me/?text=${encoded}`;
+
+  window.open(whatsappURL, "_blank");
+}
 
 </script>
   </div>
   <div id="summaryModal" class="modal">
   <div class="modal-content">
-    <h3>Order Summary</h3>
+    <h3 style="color:#2e7d32;">Submitted Successfully ✅</h3>
+    <h4 style="text-align:center;margin-top:-10px;">Order Summary</h4>
     <div id="summaryContent"></div>
-    <button class="btn" onclick="closeSummary()">Close</button>
+    <div style="display:flex; gap:10px;">
+      <button class="btn secondary" onclick="shareSummary()">Share</button>
+      <button class="btn" onclick="closeSummary()">Close</button>
+    </div>
+
   </div>
 </div>
 </body>
