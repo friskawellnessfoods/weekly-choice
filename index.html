@@ -680,6 +680,9 @@ function initState(){
   });
 }
 
+function hasAfternoonEveningSlots() {
+  return CLIENT_DELIVERY?.afternoon && CLIENT_DELIVERY?.evening;
+}
 function hasAfternoonEveningOnly() {
   return (
     !CLIENT_DELIVERY?.morning &&
@@ -687,9 +690,6 @@ function hasAfternoonEveningOnly() {
     CLIENT_DELIVERY?.evening
   );
 }
-
-
-
 
 
 /* ========= RENDER ========= */
@@ -788,7 +788,10 @@ function renderBlock(date, slot, title) {
   if (!items || !Object.keys(items).length) return '';
 
   const showSlotControls =
-    hasAfternoonEveningSlots();
+  slot === 'breakfast'
+    ? hasAfternoonEveningOnly()
+    : hasAfternoonEveningSlots();
+
 
   const showLocationControl =
     hasAfternoonEveningSlots() &&
