@@ -1380,7 +1380,7 @@ function resetAllSelections() {
 
   renderCurrentDay();
 }
-function shareSummary() {
+async function shareSummary() {
 
   const summaryDiv = document.getElementById("summaryContent");
 
@@ -1398,13 +1398,22 @@ Phone: ${phone}
 
   const finalText = header + text;
 
-  const encoded = encodeURIComponent(finalText);
-
-  const whatsappURL = `https://wa.me/?text=${encoded}`;
-
-  window.open(whatsappURL, "_blank");
+  // ✅ Use native share if supported
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "Friska Weekly Meal Summary",
+        text: finalText
+      });
+    } catch (err) {
+      console.log("Share cancelled");
+    }
+  } else {
+    // Fallback for desktop
+    navigator.clipboard.writeText(finalText);
+    alert("Summary copied to clipboard. Paste anywhere to share.");
+  }
 }
-
 </script>
   </div>
   <div id="summaryModal" class="modal">
