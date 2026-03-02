@@ -642,6 +642,18 @@ function initState(){
       STATE[date].sections.option1.location = defaultLocation;
       STATE[date].sections.option2.location = defaultLocation;
     }
+    // 🔵 FIX: Pre-assign location for dual-slot clients
+    if (hasAfternoonEveningSlots()) {
+    
+      if (CLIENT_LOCATION_1) {
+        STATE[date].sections.option1.location = CLIENT_LOCATION_1;
+      }
+    
+      if (CLIENT_LOCATION_2) {
+        STATE[date].sections.option2.location = CLIENT_LOCATION_2;
+      }
+    
+    }
 
     // Populate items
     ['option1','option2','breakfast'].forEach(sec => {
