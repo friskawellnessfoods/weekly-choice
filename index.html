@@ -4,7 +4,7 @@
   <base target="_top">
   <meta name="viewport" 
       content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
-
+<script src="config.js"></script>
     <style>
   * { box-sizing: border-box; }     
   body {
@@ -129,12 +129,27 @@
   .btn:active {
     transform: scale(0.98);
   }
+.menu-btn{
 
+background:#0a1a6e;
+color:white;
+
+border:none;
+padding:10px 18px;
+
+font-weight:bold;
+letter-spacing:1px;
+
+cursor:pointer;
+margin-top:10px;
+
+}
   .btn.secondary {
     background: #e0e0e0;
     color: #000;
   }
-
+      
+      
   /* SECTION HEADER */
   .section-header {
   display: flex;
@@ -465,6 +480,14 @@
          onkeydown="if(event.key==='Enter'){fetchClient()}">
   <button class="btn" onclick="fetchClient(event)">Login</button>
 
+  <button class="btn secondary" onclick="openMenu()">
+  View Weekly Menu
+  </button>
+  
+  <button class="btn" id="viewPastBtn" style="display:none;" onclick="openOrdersPage()">
+    View Past Selections
+  </button>
+  
   <label style="margin-top:24px;">Client Name</label>
   <input type="text" id="clientName" readonly>
 
@@ -474,6 +497,7 @@
   <label>Remarks</label>
   <input type="text" id="clientRemarks">
 </div>
+
 <div class="box" id="presetBox">
 
   <details>
@@ -519,7 +543,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzf4k9gongw9Brg2ue0fSRS1SFsrhtjFR6qwyyCfkDqUdxt6FJy8QMdwJg-cJptioPv/exec";  
+
 let CLIENT_LOCATION_1 = '';
 let CLIENT_LOCATION_2 = '';
 let CLIENT_DELIVERY = {};
@@ -587,9 +611,15 @@ async function fetchClient() {
   applyCutoff();
   initState();
   renderCurrentDay();
+
+  document.getElementById("viewPastBtn").style.display = "block";
 }
 
+function openMenu(){
 
+window.open("menu.html","_blank");
+
+}
 /* ========= CUTOFF ========= */
 function applyCutoff() {
 
@@ -1448,6 +1478,22 @@ Phone: ${phone}
     navigator.clipboard.writeText(finalText);
     alert("Summary copied to clipboard. Paste anywhere to share.");
   }
+}
+
+function openOrdersPage(){
+
+  const phone = document.getElementById("phone").value.trim();
+
+  if(!phone){
+    alert("Login first");
+    return;
+  }
+
+  const url =
+    "orders.html?phone=" + encodeURIComponent(phone);
+
+  window.open(url, "_blank");
+
 }
 </script>
   </div>
