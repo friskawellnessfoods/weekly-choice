@@ -898,10 +898,16 @@ function renderBlock(date, slot, title) {
         <div class="section-controls">
 
           <select id="slot_${date}_${slot}"
-            onchange="updateSectionSlot('${date}','${slot}',this.value)">
-            <option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>
-            <option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>
-          </select>
+              onchange="updateSectionSlot('${date}','${slot}',this.value)">
+            
+              ${(slot === 'juice1' || slot === 'juice2') && CLIENT_DELIVERY?.morning
+                ? `<option value="Morning" ${section.slot === 'Morning' ? 'selected' : ''}>Morning</option>`
+                : ''}
+            
+              <option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>
+              <option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>
+            
+            </select>
 
           ${showLocationControl ? `
             <select id="loc_${date}_${slot}"
