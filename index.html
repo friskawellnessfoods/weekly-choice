@@ -972,25 +972,30 @@ function updateSectionSlot(date, section, value) {
 
   const sec = STATE[date].sections;
 
+  // Always update the selected slot
   sec[section].slot = value;
 
-  if (section === 'option1') {
-    const otherSlot = value === 'Afternoon' ? 'Evening' : 'Afternoon';
-    sec.option2.slot = otherSlot;
+  // Apply opposite-slot rule ONLY for Afternoon + Evening clients
+  if (hasAfternoonEveningSlots()) {
 
-    const otherSelect = document.getElementById(`slot_${date}_option2`);
-    if (otherSelect) otherSelect.value = otherSlot;
-  }
+    if (section === 'option1') {
+      const otherSlot = value === 'Afternoon' ? 'Evening' : 'Afternoon';
+      sec.option2.slot = otherSlot;
 
-  if (section === 'option2') {
-    const otherSlot = value === 'Afternoon' ? 'Evening' : 'Afternoon';
-    sec.option1.slot = otherSlot;
+      const otherSelect = document.getElementById(`slot_${date}_option2`);
+      if (otherSelect) otherSelect.value = otherSlot;
+    }
 
-    const otherSelect = document.getElementById(`slot_${date}_option1`);
-    if (otherSelect) otherSelect.value = otherSlot;
+    if (section === 'option2') {
+      const otherSlot = value === 'Afternoon' ? 'Evening' : 'Afternoon';
+      sec.option1.slot = otherSlot;
+
+      const otherSelect = document.getElementById(`slot_${date}_option1`);
+      if (otherSelect) otherSelect.value = otherSlot;
+    }
+
   }
 }
-
 function updateSectionLocation(date, section, value) {
   STATE[date].sections[section].location = value;
 }
