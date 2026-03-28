@@ -332,12 +332,14 @@ const card = `
 
 <h2>${dayName.toUpperCase()}</h2>
 
+${filterProtein(d.breakfast) ? `
 <div class="section">
 <div class="label">BREAKFAST</div>
 ${filterProtein(d.breakfast)}
 </div>
 
 <div class="divider"></div>
+` : ``}
 
 <div class="section">
 <div class="label">OPTION 1</div>
