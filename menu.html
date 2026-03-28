@@ -288,7 +288,28 @@ return arr
 if(activeProtein==="all") return true;
 
 const p=(x.protein||"").toLowerCase();
-return p===activeProtein;
+
+/* VEG MENU */
+if(activeProtein==="veg"){
+  return p==="veg" || p==="veg breakfast";
+}
+
+/* CHICKEN MENU */
+if(activeProtein==="chicken"){
+  return p==="chicken" || p==="breakfast";
+}
+
+/* EGG MENU */
+if(activeProtein==="egg"){
+  return p==="egg";
+}
+
+/* SEAFOOD MENU */
+if(activeProtein==="seafood"){
+  return p==="seafood";
+}
+
+return false;
 
 })
 .map(x=>`<div class="dish">${x.label}</div>`)
