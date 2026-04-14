@@ -154,10 +154,22 @@ const d = menu[date];
 const dayName = new Date(date)
 .toLocaleDateString('en-US',{weekday:'long'});
 
+const formattedDate = new Date(date)
+.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
 const card = `
 <div class="day-card">
 
 <h2>${dayName}</h2>
+<div style="
+text-align:center;
+font-size:13px;
+letter-spacing:2px;
+margin-top:-10px;
+margin-bottom:15px;
+">
+${formattedDate.toUpperCase()}
+</div>
 
 <div class="section">
 <div class="label">BREAKFAST</div>
