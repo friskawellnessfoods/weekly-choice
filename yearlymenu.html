@@ -3,6 +3,8 @@
 
 <head>
 <script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Friska Menu Viewer</title>
 
@@ -106,6 +108,7 @@ margin:10px 0;
 <input type="date" id="startDate">
 <input type="date" id="endDate">
 <button onclick="loadMenu()">Load Menu</button>
+<button onclick="downloadPDF()">Download PDF</button>
 </div>
 
 <div id="menuGrid" class="menu-grid">
@@ -207,6 +210,40 @@ return arr.map(x=>`<div class="dish">${x.label}</div>`).join("");
 function listSimple(arr){
 if(!arr) return "";
 return arr.map(x=>`<div class="dish">${x.label || x}</div>`).join("");
+}
+
+async function downloadPDF(){
+
+const { jsPDF } = window.jspdf;
+
+const grid = document.getElementById("menuGrid");
+
+// force desktop layout
+grid.style.gridTemplateColumns = "repeat(3,1fr)";
+grid.style.width = "1200px";
+
+await new Promise(r=>setTimeout(r,300));
+
+const canvas = await html2canvas(grid,{
+scale:2,
+useCORS:true
+});
+
+const imgData = canvas.toDataURL("image/png");
+
+const pdf = new jsPDF("p","mm","a4");
+
+const pdfWidth = 210;
+const pdfHeight = canvas.height * pdfWidth / canvas.width;
+
+pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
+
+pdf.save("Menu.pdf");
+
+// restore layout
+grid.style.gridTemplateColumns = "";
+grid.style.width = "";
+
 }
 
 </script>
