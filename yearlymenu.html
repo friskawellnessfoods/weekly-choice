@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Friska Menu Viewer</title>
+
+<style>
+
+body{
+font-family:"Georgia",serif;
+margin:0;
+padding:20px;
+background:#f7e27a;
+}
+
+.menu-wrapper{
+max-width:1200px;
+margin:auto;
+}
+
+.menu-title{
+text-align:center;
+font-size:36px;
+margin-bottom:20px;
+}
+
+.controls{
+text-align:center;
+margin-bottom:20px;
+}
+
+input{
+padding:8px;
+margin:5px;
+}
+
+button{
+padding:8px 15px;
+background:#0a1a6e;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+.menu-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+}
+
+.day-card{
+background:white;
+padding:20px;
+border:2px solid #000;
+}
+
+.day-card h2{
+text-align:center;
+}
+
+.section{
+margin-bottom:15px;
+}
+
+.label{
+font-weight:bold;
+text-align:center;
+margin-bottom:5px;
+}
+
+.dish{
+text-align:center;
+margin-bottom:5px;
+}
+
+.divider{
+height:1px;
+background:#ccc;
+margin:10px 0;
+}
+
+@media(max-width:900px){
+.menu-grid{grid-template-columns:1fr;}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="menu-wrapper">
+
+<h1 class="menu-title">FRISKA MENU VIEWER</h1>
+
+<div class="controls">
+<input type="date" id="startDate">
+<input type="date" id="endDate">
+<button onclick="loadMenu()">Load Menu</button>
+</div>
+
+<div id="menuGrid" class="menu-grid">
+Select dates to load menu
+</div>
+
+</div>
+
+<script>
+
+// 🔥 IMPORTANT — PUT YOUR WEB APP URL HERE
+const API_URL = "https://script.google.com/macros/s/AKfycbzH9pNTQJYWP-JPZ_pWxlfXtD7i-5gHWkl0jC9YweprKHFVJ93n4wbnEr-HxR41Cmdw/exec";
+
+async function loadMenu(){
+
+const start = document.getElementById("startDate").value;
+const end   = document.getElementById("endDate").value;
+
+if(!start || !end){
+alert("Select both dates");
+return;
+}
+
+const res = await fetch(
+`${API_URL}?action=getMenuByDate&start=${start}&end=${end}`
+);
+
+const menu = await res.json();
+
+renderMenu(menu);
+
+}
+
+function renderMenu(menu){
+
+const grid = document.getElementById("menuGrid");
+grid.innerHTML="";
+
+const dates = Object.keys(menu).sort();
+
+dates.forEach(date=>{
+
+const d = menu[date];
+
+const dayName = new Date(date)
+.toLocaleDateString('en-US',{weekday:'long'});
+
+const card = `
+<div class="day-card">
+
+<h2>${dayName}</h2>
+
+<div class="section">
+<div class="label">BREAKFAST</div>
+${list(d.breakfast)}
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+<div class="label">OPTION 1</div>
+${list(d.option1)}
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+<div class="label">OPTION 2</div>
+${list(d.option2)}
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+<div class="label">SNACK</div>
+${listSimple(d.snack)}
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+<div class="label">JUICES</div>
+${listSimple(d.juice1)}
+${listSimple(d.juice2)}
+</div>
+
+</div>
+`;
+
+grid.innerHTML += card;
+
+});
+
+}
+
+function list(arr){
+if(!arr) return "";
+return arr.map(x=>`<div class="dish">${x.label}</div>`).join("");
+}
+
+function listSimple(arr){
+if(!arr) return "";
+return arr.map(x=>`<div class="dish">${x.label || x}</div>`).join("");
+}
+
+</script>
+
+</body>
+</html>
