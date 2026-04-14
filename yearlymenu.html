@@ -226,16 +226,12 @@ return arr.map(x=>`<div class="dish">${x.label || x}</div>`).join("");
 
 async function downloadPDF(){
 
-const btnText = "Preparing PDF...";
-
 const grid = document.getElementById("menuGrid");
 
-/* FORCE DESKTOP LAYOUT */
-
+/* FORCE DESKTOP */
 grid.style.gridTemplateColumns = "repeat(3,1fr)";
 grid.style.width = "1200px";
 
-/* WAIT FOR LAYOUT TO APPLY */
 await new Promise(r=>setTimeout(r,400));
 
 const canvas = await html2canvas(grid,{
@@ -249,15 +245,33 @@ const { jsPDF } = window.jspdf;
 const pdf = new jsPDF("p","mm","a4");
 
 const pdfWidth = 210;
-const pdfHeight = canvas.height * pdfWidth / canvas.width;
+const pdfHeight = 297;
 
-/* ADD IMAGE */
-pdf.addImage(imgData,"PNG",5,10,200,pdfHeight);
+const imgWidth = pdfWidth;
+const imgHeight = canvas.height * pdfWidth / canvas.width;
+
+let heightLeft = imgHeight;
+let position = 0;
+
+/* FIRST PAGE */
+pdf.addImage(imgData,"PNG",0,position,imgWidth,imgHeight);
+heightLeft -= pdfHeight;
+
+/* ADD EXTRA PAGES */
+while(heightLeft > 0){
+
+position = heightLeft - imgHeight;
+
+pdf.addPage();
+pdf.addImage(imgData,"PNG",0,position,imgWidth,imgHeight);
+
+heightLeft -= pdfHeight;
+}
 
 /* SAVE */
 pdf.save("Friska_Menu.pdf");
 
-/* RESTORE MOBILE LAYOUT */
+/* RESTORE */
 grid.style.gridTemplateColumns = "";
 grid.style.width = "";
 
