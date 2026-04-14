@@ -2,6 +2,7 @@
 <html>
 
 <head>
+<script src="config.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Friska Menu Viewer</title>
 
@@ -50,7 +51,14 @@ gap:20px;
 }
 
 .day-card{
-background:white;
+
+background:
+linear-gradient(rgba(255,255,255,0.85),rgba(255,255,255,0.85)),
+url("bg.webp");
+
+background-size:cover;
+background-position:center;
+
 padding:20px;
 border:2px solid #000;
 }
@@ -108,8 +116,6 @@ Select dates to load menu
 
 <script>
 
-// 🔥 IMPORTANT — PUT YOUR WEB APP URL HERE
-const API_URL = "https://script.google.com/macros/s/AKfycbww1kCPpPRLneoFW9yyxhTNECzHCQUbUg_96HUKR3kSXnE5d4PQH7PaQFsiX_9SstOo/exec";
 
 async function loadMenu(){
 
