@@ -214,15 +214,17 @@ return arr.map(x=>`<div class="dish">${x.label || x}</div>`).join("");
 
 async function downloadPDF(){
 
-const { jsPDF } = window.jspdf;
+const btnText = "Preparing PDF...";
 
 const grid = document.getElementById("menuGrid");
 
-// force desktop layout
+/* FORCE DESKTOP LAYOUT */
+
 grid.style.gridTemplateColumns = "repeat(3,1fr)";
 grid.style.width = "1200px";
 
-await new Promise(r=>setTimeout(r,300));
+/* WAIT FOR LAYOUT TO APPLY */
+await new Promise(r=>setTimeout(r,400));
 
 const canvas = await html2canvas(grid,{
 scale:2,
@@ -231,16 +233,19 @@ useCORS:true
 
 const imgData = canvas.toDataURL("image/png");
 
+const { jsPDF } = window.jspdf;
 const pdf = new jsPDF("p","mm","a4");
 
 const pdfWidth = 210;
 const pdfHeight = canvas.height * pdfWidth / canvas.width;
 
-pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
+/* ADD IMAGE */
+pdf.addImage(imgData,"PNG",5,10,200,pdfHeight);
 
-pdf.save("Menu.pdf");
+/* SAVE */
+pdf.save("Friska_Menu.pdf");
 
-// restore layout
+/* RESTORE MOBILE LAYOUT */
 grid.style.gridTemplateColumns = "";
 grid.style.width = "";
 
