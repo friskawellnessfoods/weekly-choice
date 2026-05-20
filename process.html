@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="config.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 400px;
+    }
+    .logo-wrap {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .logo-wrap img {
+      max-width: 120px;
+      height: auto;
+    }
+    h2 { text-align: center; margin: 0 0 24px; font-size: 20px; }
+    label { font-size: 14px; font-weight: 500; display: block; margin-bottom: 6px; }
+    input[type="date"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      margin-bottom: 16px;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: none;
+      background: #1976d2;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .progress-wrap {
+      display: none;
+      margin-top: 20px;
+    }
+    .progress-label {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #1976d2;
+      border-radius: 10px;
+      transition: width 0.8s ease;
+    }
+    .progress-fill.done {
+      background: #2e7d32;
+      width: 100% !important;
+      transition: width 0.3s ease;
+    }
+
+    #status {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 14px;
+      min-height: 20px;
+    }
+    .success { color: #2e7d32; }
+    .error   { color: #c62828; }
+    .result-list {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #444;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .result-list div {
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo-wrap">
+    <img src="logo.png" alt="Logo">
+  </div>
+
+  <h2>Process Orders to Output</h2>
+
+  <label>Select Date</label>
+  <input type="date" id="singleDate">
+
+  <button class="btn" id="processBtn" onclick="runProcess()">
+    Process to Orders_Output
+  </button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-label">
+      <span id="progressText">Processing...</span>
+      <span id="elapsedTime">0s</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <div id="resultList" class="result-list"></div>
+</div>
+
+<script>
+let elapsedTimer = null;
+let fakeTimer = null;
+
+function startProgress() {
+  let seconds = 0;
+  let fakePct = 0;
+
+  document.getElementById('elapsedTime').textContent = '0s';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressFill').classList.remove('done');
+
+  elapsedTimer = setInterval(() => {
+    seconds++;
+    document.getElementById('elapsedTime').textContent = seconds + 's';
+  }, 1000);
+
+  fakeTimer = setInterval(() => {
+    if (fakePct < 85) {
+      fakePct += 3;
+      document.getElementById('progressFill').style.width = fakePct + '%';
+    }
+  }, 800);
+}
+
+function stopProgress() {
+  clearInterval(elapsedTimer);
+  clearInterval(fakeTimer);
+  elapsedTimer = null;
+  fakeTimer = null;
+}
+
+async function runProcess() {
+  const btn = document.getElementById('processBtn');
+  const resultList = document.getElementById('resultList');
+  const progressWrap = document.getElementById('progressWrap');
+
+  resultList.innerHTML = '';
+  setStatus('');
+
+  const single = document.getElementById('singleDate').value;
+  if (!single) return setStatus('Select a date first.', 'error');
+
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  progressWrap.style.display = 'block';
+  startProgress();
+
+  try {
+    const params = new URLSearchParams();
+    params.append('action', 'processLogByDate');
+    params.append('date', single);
+
+    const res = await fetch(API_URL, { method: 'POST', body: params });
+    const data = await res.json();
+
+    stopProgress();
+    document.getElementById('progressFill').classList.add('done');
+    document.getElementById('progressText').textContent = 'Done';
+
+    const div = document.createElement('div');
+    if (data.success) {
+      div.textContent = '✅ ' + single + ' — ' + data.message;
+      setStatus('Completed successfully.', 'success');
+    } else {
+      div.textContent = '⚠️ ' + single + ' — ' + data.message;
+      setStatus('No data found for this date.', 'error');
+    }
+    resultList.appendChild(div);
+
+  } catch (err) {
+    stopProgress();
+    progressWrap.style.display = 'none';
+    setStatus('❌ Network error. Try again.', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Process to Orders_Output';
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = type || '';
+}
+</script>
+</body>
+</html>
