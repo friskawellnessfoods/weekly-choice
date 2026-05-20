@@ -532,6 +532,7 @@ margin-top:10px;
 <div id="dayContainer"></div>
 </div>
 
+<div id="dayContainer"></div>
 
 <div class="nav-row">
   <button id="backBtn" class="btn secondary" onclick="prevDay()">Back</button>
@@ -548,6 +549,7 @@ let CLIENT_LOCATION_2 = '';
 let CLIENT_DELIVERY = {};
 /* ========= CONFIG ========= */
 const CUTOFF_HOUR = 00;
+const CUTOFF_ENABLED = true;
 
 let MENU = {};
 let DATES = [];
@@ -621,6 +623,12 @@ window.open("menu.html","_blank");
 }
 /* ========= CUTOFF ========= */
 function applyCutoff() {
+
+  if (!CUTOFF_ENABLED) {
+    VISIBLE_DATES = DATES.filter(d => MENU[d]);
+    currentIndex = 0;
+    return;
+  }
 
   const now = new Date();
   const today = new Date(
@@ -897,16 +905,10 @@ function renderBlock(date, slot, title) {
         <div class="section-controls">
 
           <select id="slot_${date}_${slot}"
-              onchange="updateSectionSlot('${date}','${slot}',this.value)">
-            
-              ${(slot === 'juice1' || slot === 'juice2') && CLIENT_DELIVERY?.morning
-                ? `<option value="Morning" ${section.slot === 'Morning' ? 'selected' : ''}>Morning</option>`
-                : ''}
-            
-              <option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>
-              <option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>
-            
-            </select>
+            onchange="updateSectionSlot('${date}','${slot}',this.value)">
+            <option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>
+            <option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>
+          </select>
 
           ${showLocationControl ? `
             <select id="loc_${date}_${slot}"
@@ -1139,11 +1141,22 @@ async function saveCurrentDay(btn) {
     return alert("No selections made.");
   }
 
-  const payload = {
-    phone,
-    remarks: clientRemarks.value || '',
-    days: allDays
-  };
+  const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const submissionTimestamp =
+      pad(now.getDate()) + '-' +
+      pad(now.getMonth()+1) + '-' +
+      now.getFullYear() + ' ' +
+      pad(now.getHours()) + ':' +
+      pad(now.getMinutes()) + ':' +
+      pad(now.getSeconds());
+  
+    const payload = {
+      phone,
+      remarks: clientRemarks.value || '',
+      submissionTimestamp,
+      days: allDays
+    };
 
   const params = new URLSearchParams();
   params.append("action", "submitOrder");
@@ -1164,10 +1177,18 @@ async function saveCurrentDay(btn) {
   btn.classList.remove("loading");
 
   // ⏳ Keep disabled for 60 seconds
-  setTimeout(() => {
-    btn.disabled = false;
-    btn.dataset.locked = "false";
-  }, 60000);
+  let countdown = 30;
+    btn.textContent = `Wait ${countdown}s`;
+  
+    const timer = setInterval(() => {
+      countdown--;
+      btn.textContent = countdown > 0 ? `Wait ${countdown}s` : 'Submit & Exit';
+      if (countdown <= 0) {
+        clearInterval(timer);
+        btn.disabled = false;
+        btn.dataset.locked = "false";
+      }
+    }, 1000);
 }
 
 
