@@ -532,8 +532,6 @@ margin-top:10px;
 <div id="dayContainer"></div>
 </div>
 
-<div id="dayContainer"></div>
-
 <div class="nav-row">
   <button id="backBtn" class="btn secondary" onclick="prevDay()">Back</button>
   <button id="nextBtn" class="btn secondary" onclick="nextDay(event)">Next Day</button>
@@ -763,6 +761,13 @@ function hasAfternoonEveningOnly() {
   );
 }
 
+function isMorningOnlyClient() {
+  return (
+    CLIENT_DELIVERY?.morning &&
+    !CLIENT_DELIVERY?.afternoon &&
+    !CLIENT_DELIVERY?.evening
+  );
+}
 
 /* ========= RENDER ========= */
 function renderCurrentDay(){
@@ -815,9 +820,9 @@ function renderCurrentDay(){
     </div>
 
       ${renderBlock(date,'breakfast','Breakfast')}
-      ${renderBlock(date,'option1','Option 1')}
-      ${renderBlock(date,'option2','Option 2')}
-      ${renderBlock(date,'snack','Snack')}
+      ${!isMorningOnlyClient() ? renderBlock(date,'option1','Option 1') : ''}
+      ${!isMorningOnlyClient() ? renderBlock(date,'option2','Option 2') : ''}
+      ${!isMorningOnlyClient() ? renderBlock(date,'snack','Snack') : ''}
       ${renderBlock(date,'juice1','Juice 1')}
       ${renderBlock(date,'juice2','Juice 2')}
       
@@ -862,7 +867,13 @@ function renderBlock(date, slot, title) {
   const showSlotControls =
   slot === 'breakfast'
     ? hasAfternoonEveningOnly()
-    : hasAfternoonEveningSlots();
+    : slot === 'juice1' || slot === 'juice2'
+      ? (CLIENT_DELIVERY?.morning || CLIENT_DELIVERY?.afternoon || CLIENT_DELIVERY?.evening) && (
+          (CLIENT_DELIVERY?.morning ? 1 : 0) +
+          (CLIENT_DELIVERY?.afternoon ? 1 : 0) +
+          (CLIENT_DELIVERY?.evening ? 1 : 0)
+        ) > 1
+      : hasAfternoonEveningSlots();
 
 
   const showLocationControl =
@@ -906,8 +917,9 @@ function renderBlock(date, slot, title) {
 
           <select id="slot_${date}_${slot}"
             onchange="updateSectionSlot('${date}','${slot}',this.value)">
-            <option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>
-            <option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>
+            ${CLIENT_DELIVERY?.morning ? `<option value="Morning" ${section.slot === 'Morning' ? 'selected' : ''}>Morning</option>` : ''}
+            ${CLIENT_DELIVERY?.afternoon ? `<option value="Afternoon" ${section.slot === 'Afternoon' ? 'selected' : ''}>Afternoon</option>` : ''}
+            ${CLIENT_DELIVERY?.evening ? `<option value="Evening" ${section.slot === 'Evening' ? 'selected' : ''}>Evening</option>` : ''}
           </select>
 
           ${showLocationControl ? `
