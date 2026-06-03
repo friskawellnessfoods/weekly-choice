@@ -1235,12 +1235,12 @@ async function saveCurrentDay(btn) {
     return alert("No selections made.");
   }
 
-  const now = new Date();
+ const now = new Date();
     const pad = n => String(n).padStart(2,'0');
     const submissionTimestamp =
-      pad(now.getDate()) + '-' +
+      now.getFullYear() + '-' +
       pad(now.getMonth()+1) + '-' +
-      now.getFullYear() + ' ' +
+      pad(now.getDate()) + ' ' +
       pad(now.getHours()) + ':' +
       pad(now.getMinutes()) + ':' +
       pad(now.getSeconds());
