@@ -51,6 +51,68 @@ input, select {
   font-size:14px;
 }
 
+.dropdown-btn {
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:14px;
+  background:white;
+  text-align:left;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.dropdown-btn:hover {
+  background:#f9f9f9;
+}
+
+.dropdown-menu {
+  display:none;
+  position:absolute;
+  background:white;
+  border:1px solid #ddd;
+  border-radius:8px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  z-index:100;
+  width:calc(100% - 30px);
+  max-height:250px;
+  overflow-y:auto;
+  margin-top:-12px;
+}
+
+.dropdown-menu.active {
+  display:block;
+}
+
+.dropdown-menu label {
+  display:block;
+  padding:12px 15px;
+  font-size:14px;
+  cursor:pointer;
+  border-bottom:1px solid #f0f0f0;
+  margin:0;
+}
+
+.dropdown-menu label:last-child {
+  border-bottom:none;
+}
+
+.dropdown-menu label:hover {
+  background:#f9f9f9;
+}
+
+.dropdown-menu input[type="checkbox"] {
+  width:auto;
+  margin-right:8px;
+  margin-bottom:0;
+  padding:0;
+  border:none;
+}
+
 button {
   width:100%;
   padding:14px;
@@ -91,18 +153,23 @@ button {
     <input id="name" placeholder="Client Name">
     <input id="phone" placeholder="Phone Number">
 
-    <select id="type">
-      <option value="">Select Meal Type</option>
-      <option value="1 Morning deliver">1 Morning deliver</option>
-      <option value="2 Nutri Balance">2 Nutri Balance</option>
-      <option value="3 High Protein">3 High Protein</option>
-      <option value="4 High Carb">4 High Carb</option>
-      <option value="5 Low Carb">5 Low Carb</option>
-      <option value="6 No Carb">6 No Carb</option>
-      <option value="7 High Fiber">7 High Fiber</option>
-      <option value="8 Multi-Category">8 Multi-Category</option>
-      <option value="9 Evening Delivery">9 Evening Delivery</option>
-    </select>
+    <div style="position:relative;">
+      <button type="button" class="dropdown-btn" id="mealTypeBtn">
+        <span id="mealTypeText">Select Meal Types</span>
+        <span>▼</span>
+      </button>
+      <div class="dropdown-menu" id="mealTypeDropdown">
+        <label><input type="checkbox" class="mealType" value="1 Morning deliver"> 1 Morning deliver</label>
+        <label><input type="checkbox" class="mealType" value="2 Nutri Balance"> 2 Nutri Balance</label>
+        <label><input type="checkbox" class="mealType" value="3 High Protein"> 3 High Protein</label>
+        <label><input type="checkbox" class="mealType" value="4 High Carb"> 4 High Carb</label>
+        <label><input type="checkbox" class="mealType" value="5 Low Carb"> 5 Low Carb</label>
+        <label><input type="checkbox" class="mealType" value="6 No Carb"> 6 No Carb</label>
+        <label><input type="checkbox" class="mealType" value="7 High Fiber"> 7 High Fiber</label>
+        <label><input type="checkbox" class="mealType" value="8 Multi-Category"> 8 Multi-Category</label>
+        <label><input type="checkbox" class="mealType" value="9 Evening Delivery"> 9 Evening Delivery</label>
+      </div>
+    </div>
 
     <input id="remarks" placeholder="Remarks">
     <input id="location1" placeholder="Location 1">
@@ -134,7 +201,41 @@ let isSubmitting = false;
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("saveBtn")
     .addEventListener("click", addClient);
+
+  // Dropdown toggle
+  document.getElementById("mealTypeBtn").addEventListener("click", () => {
+    const dropdown = document.getElementById("mealTypeDropdown");
+    dropdown.classList.toggle("active");
+  });
+
+  // Checkbox change event
+  document.querySelectorAll(".mealType").forEach(checkbox => {
+    checkbox.addEventListener("change", updateMealTypeDisplay);
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    const btn = document.getElementById("mealTypeBtn");
+    const dropdown = document.getElementById("mealTypeDropdown");
+    if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove("active");
+    }
+  });
 });
+
+function updateMealTypeDisplay(){
+  const selected = Array.from(document.querySelectorAll(".mealType:checked"))
+    .map(checkbox => checkbox.value);
+  
+  const displayText = document.getElementById("mealTypeText");
+  if(selected.length === 0){
+    displayText.innerText = "Select Meal Types";
+  } else if(selected.length === 1){
+    displayText.innerText = selected[0];
+  } else {
+    displayText.innerText = `${selected.length} meal types selected`;
+  }
+}
 
 function showMessage(text, error=false){
   const msg = document.getElementById("message");
@@ -155,10 +256,15 @@ async function addClient(){
   saveBtn.innerHTML = `<span class="spinner"></span> Saving...`;
   container.classList.add("loading");
 
+  // Collect selected meal types
+  const selectedMealTypes = Array.from(document.querySelectorAll(".mealType:checked"))
+    .map(checkbox => checkbox.value)
+    .join(" ");
+
   const data = {
     name: document.getElementById("name").value.trim(),
     phone: document.getElementById("phone").value.trim(),
-    type: document.getElementById("type").value,
+    type: selectedMealTypes,
     remarks: document.getElementById("remarks").value.trim(),
     location1: document.getElementById("location1").value.trim(),
     location2: document.getElementById("location2").value.trim(),
@@ -216,7 +322,6 @@ function clearForm(){
     if(i.type==="checkbox") i.checked=false;
     else i.value="";
   });
-  document.getElementById("type").value="";
 }
 </script>
 
