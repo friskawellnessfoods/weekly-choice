@@ -244,7 +244,7 @@ let activeProtein = "all";
 
 async function loadMenu(){
 
-const res = await fetch(API_URL + "?action=getMenu");
+const res = await fetch(`${API_URL}?action=getGlideMenu&t=${Date.now()}`, { cache: "no-store" });
 weeklyMenu = await res.json();
 
 renderMenu();
