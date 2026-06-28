@@ -91,8 +91,9 @@
       buttons.forEach(b => b.disabled = true);
       setStatus("Refreshing…", "");
 
-      fetch(API_URL, {
+      fetch(API_URL + "?t=" + Date.now(), {
         method: "POST",
+        cache: "no-store",
         body: new URLSearchParams({ action })
       })
       .then(res => res.json())
