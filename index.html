@@ -1060,7 +1060,15 @@ function changeQty(d, cardSlot, label, delta, isAlt){
   if (span) span.innerText = obj.qty;
 }
 function updateSectionSlot(date, section, value) {
-  STATE[date].sections[section].slot = value;
+  const sec = STATE[date].sections[section];
+  sec.slot = value;
+  // re-stamp slotFrom on any already-picked items so backend matches the new slot
+  ['items', 'altItems'].forEach(store => {
+    if (!sec[store]) return;
+    Object.values(sec[store]).forEach(it => {
+      if (it && it.qty > 0) it.slotFrom = value;
+    });
+  });
 }
 
 function updateSectionLocation(date, section, value) {
