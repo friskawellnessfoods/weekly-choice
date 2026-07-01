@@ -643,15 +643,20 @@ function initState(){
     // Apply for any client that is NOT afternoon+evening (those get per-card slots below)
     if (!hasAfternoonEveningSlots()) {
 
-      const defaultLocation =
-        CLIENT_LOCATION_1 || CLIENT_LOCATION_2 || '';
+      // morning + evening → meals default to location2; everyone else → location1
+      const isMorningEvening =
+        CLIENT_DELIVERY?.morning && CLIENT_DELIVERY?.evening && !CLIENT_DELIVERY?.afternoon;
+
+      const mealLocation = isMorningEvening
+        ? (CLIENT_LOCATION_2 || CLIENT_LOCATION_1 || '')
+        : (CLIENT_LOCATION_1 || CLIENT_LOCATION_2 || '');
 
       STATE[date].sections.option1.slot = _mealSlot;
       STATE[date].sections.option2.slot = _mealSlot;
       STATE[date].sections.snack.slot   = _mealSlot;
 
-      STATE[date].sections.option1.location = defaultLocation;
-      STATE[date].sections.option2.location = defaultLocation;
+      STATE[date].sections.option1.location = mealLocation;
+      STATE[date].sections.option2.location = mealLocation;
     }
     // 🔵 FIX: Pre-assign location for dual-slot clients
     if (hasAfternoonEveningSlots()) {
@@ -819,13 +824,14 @@ function renderCurrentDay(){
       
           ${CLIENT_LOCATION_1 ? `
             <option value="${CLIENT_LOCATION_1}"
-              ${!CLIENT_LOCATION_2 ? 'selected' : ''}>
+              ${STATE[date].sections.option1.location === CLIENT_LOCATION_1 ? 'selected' : ''}>
               ${CLIENT_LOCATION_1}
             </option>
           ` : ''}
       
           ${CLIENT_LOCATION_2 ? `
-            <option value="${CLIENT_LOCATION_2}">
+            <option value="${CLIENT_LOCATION_2}"
+              ${STATE[date].sections.option1.location === CLIENT_LOCATION_2 ? 'selected' : ''}>
               ${CLIENT_LOCATION_2}
             </option>
           ` : ''}
